@@ -4,45 +4,6 @@
 
 ---
 
-## 개발 환경
-
-이 저장소는 npm workspaces 기반 monorepo입니다.
-
-```text
-apps/web        React + TypeScript + Vite
-apps/server     Node.js + TypeScript + Express
-packages/shared web과 server가 함께 사용하는 TypeScript 패키지
-```
-
-### 실행 준비
-
-```powershell
-npm install
-Copy-Item .env.example .env
-```
-
-### 개발 서버
-
-```powershell
-npm run dev
-```
-
-- Web: `http://localhost:5173`
-- Server health: `http://localhost:3000/api/health`
-
-개별 실행은 `npm run dev:web`, `npm run dev:server`를 사용합니다.
-
-### 검증
-
-```powershell
-npm run typecheck
-npm run build
-```
-
-현재 단계에는 health 연결만 포함되어 있습니다. Prisma, 비즈니스 API, Journey 로직과 AI 호출은 이후 구현 단계에서 추가합니다.
-
----
-
 ## 1. 프로젝트 소개
 
 **MCM Journey Passport**는 고객의 온라인 취향 데이터와 짧은 시작 질문을 바탕으로 AI가 개인화된 시나리오를 생성하고, 고객이 실제 MCM 제품을 선택하며 매장을 탐험하도록 돕는 예약형 인터랙티브 리테일 서비스입니다.
