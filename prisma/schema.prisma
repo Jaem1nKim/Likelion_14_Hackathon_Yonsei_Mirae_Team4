@@ -1,0 +1,487 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../apps/server/src/generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+}
+
+enum OnlineEventType {
+  VIEW
+  REPEAT_VIEW
+  WISHLIST
+  CART
+  PURCHASE
+  STORE_VISIT
+  JOURNEY_VIEW
+}
+
+enum PreferenceType {
+  CATEGORY
+  COLOR
+  STYLE
+  MATERIAL
+  FUNCTION
+}
+
+enum ProductCategory {
+  BAG
+  APPAREL
+  SHOES
+  ACCESSORY
+}
+
+enum ProductTagType {
+  STYLE
+  FUNCTION
+  SILHOUETTE
+  MOOD
+}
+
+enum TagSource {
+  MANUAL
+  AI
+  RULE
+}
+
+enum ReservationStatus {
+  RESERVED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum JourneyStatus {
+  READY
+  ACTIVE
+  FINISHED
+  CANCELLED
+}
+
+enum JourneyStage {
+  INTRO
+  BAG
+  APPAREL
+  SHOES
+  ACCESSORY
+  RESULT
+}
+
+enum JourneyStepStatus {
+  GENERATED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+enum InteractionType {
+  VIEWED
+  COMPARED
+  SELECTED
+  REJECTED
+  DESELECTED
+}
+
+enum RecommendationType {
+  MATCH
+  COMPARE
+  CHALLENGE
+}
+
+enum AIPurpose {
+  TASTE_ANALYSIS
+  JOURNEY_STEP
+  JOURNEY_RESULT
+  STAFF_SUMMARY
+}
+
+enum AIExecutionStatus {
+  SUCCESS
+  FALLBACK
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         UserRole
+  profileType  String?
+  avatarUrl    String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  consents        Consent[]
+  onlineBehaviors OnlineBehavior[]
+  tasteProfile    TasteProfile?
+  reservations    Reservation[]
+  journeys        Journey[]
+
+  @@index([role, isActive])
+}
+
+model Consent {
+  id                  String   @id @default(cuid())
+  userId              String
+  consentVersion      String
+  behaviorDataAllowed Boolean
+  journeyDataAllowed  Boolean
+  marketingAllowed    Boolean  @default(false)
+  agreedAt            DateTime @default(now())
+  withdrawnAt         DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId, agreedAt])
+}
+
+model OnlineBehavior {
+  id              String          @id @default(cuid())
+  userId          String
+  productId       String?
+  eventType       OnlineEventType
+  selectedColor   String?
+  selectedOption  String?
+  durationSeconds Int?
+  metadataJson    String?
+  occurredAt      DateTime
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([userId, occurredAt])
+  @@index([userId, eventType])
+  @@index([productId, eventType])
+}
+
+model TasteProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  summary           String
+  practicalityScore Int
+  expressionScore   Int
+  noveltyScore      Int
+  confidenceScore   Int
+  calculatedAt      DateTime
+  updatedAt         DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  preferences TastePreference[]
+}
+
+model TastePreference {
+  id             String         @id @default(cuid())
+  tasteProfileId String
+  type           PreferenceType
+  value          String
+  score          Int
+  source         String
+  createdAt      DateTime       @default(now())
+
+  tasteProfile TasteProfile @relation(fields: [tasteProfileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([tasteProfileId, type, value])
+  @@index([tasteProfileId, type])
+}
+
+model Store {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  location         String
+  description      String?
+  imageUrl         String?
+  isJourneyEnabled Boolean  @default(true)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  zones        StoreZone[]
+  inventories Inventory[]
+  reservations Reservation[]
+  journeys     Journey[]
+}
+
+model StoreZone {
+  id            String          @id @default(cuid())
+  storeId       String
+  code          String
+  name          String
+  category      ProductCategory
+  floor         String?
+  directionText String
+  heritageTitle String?
+  heritageStory String?
+  displayOrder  Int
+  isActive      Boolean         @default(true)
+
+  store        Store         @relation(fields: [storeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  inventories  Inventory[]
+  journeySteps JourneyStep[]
+
+  @@unique([storeId, code])
+}
+
+model Product {
+  id                 String          @id @default(cuid())
+  sku                String          @unique
+  name               String
+  category           ProductCategory
+  color              String
+  material           String?
+  priceKrw           Int
+  size               String?
+  capacity           String?
+  wearMethod         String?
+  description        String
+  imageUrl           String
+  personaLayerUrl    String?
+  sceneBackgroundKey String?
+  isActive           Boolean         @default(true)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  onlineBehaviors      OnlineBehavior[]
+  tags                 ProductTag[]
+  inventories          Inventory[]
+  selectedBySteps      JourneyStep[]
+  stepRecommendations  StepRecommendation[]
+  interactions         ProductInteraction[]
+  journeyResultItems   JourneyResultItem[]
+}
+
+model ProductTag {
+  id        String         @id @default(cuid())
+  productId String
+  type      ProductTagType
+  name      String
+  score     Int
+  source    TagSource
+  verified  Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([productId, type, name])
+}
+
+model Inventory {
+  id                 String   @id @default(cuid())
+  storeId            String
+  zoneId             String
+  productId          String
+  quantity           Int
+  isDisplayAvailable Boolean
+  updatedAt          DateTime @updatedAt
+
+  store   Store     @relation(fields: [storeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  zone    StoreZone @relation(fields: [zoneId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  product Product   @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([storeId, productId])
+}
+
+model Reservation {
+  id                 String            @id @default(cuid())
+  userId             String
+  storeId            String
+  reservedAt         DateTime
+  startQuestionCode  String
+  startAnswerCode    String
+  startAnswerLabel   String
+  qrToken            String            @unique
+  reservationCode    String            @unique
+  status             ReservationStatus @default(RESERVED)
+  checkedInAt        DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  store   Store    @relation(fields: [storeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  journey Journey?
+
+  @@index([userId, reservedAt])
+  @@index([storeId, reservedAt, status])
+}
+
+model Journey {
+  id                String        @id @default(cuid())
+  userId            String
+  reservationId     String        @unique
+  storeId           String
+  status            JourneyStatus @default(READY)
+  currentStage      JourneyStage  @default(INTRO)
+  currentStepNumber Int           @default(0)
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  cancelledAt       DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reservation     Reservation             @relation(fields: [reservationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  store           Store                   @relation(fields: [storeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  profileSnapshot JourneyProfileSnapshot?
+  steps           JourneyStep[]
+  interactions    ProductInteraction[]
+  result          JourneyResult?
+  aiExecutions    AIExecution[]
+
+  @@index([userId, status])
+  @@index([storeId, status, createdAt])
+}
+
+model JourneyProfileSnapshot {
+  id                    String   @id @default(cuid())
+  journeyId             String   @unique
+  longTermTasteSummary  String
+  todayIntentSummary    String
+  practicalityScore     Int
+  expressionScore       Int
+  noveltyScore          Int
+  preferencesJson       String
+  behaviorSummaryJson   String?
+  createdAt             DateTime @default(now())
+
+  journey Journey @relation(fields: [journeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model JourneyStep {
+  id                 String            @id @default(cuid())
+  journeyId          String
+  stepNumber         Int
+  stage              JourneyStage
+  status             JourneyStepStatus
+  scenarioTitle      String
+  scenarioText       String
+  zoneId             String
+  heritageTitle      String?
+  heritageText       String?
+  selectedProductId  String?
+  canFinishJourney   Boolean
+  usedFallback       Boolean
+  createdAt          DateTime          @default(now())
+  completedAt        DateTime?
+
+  journey         Journey                 @relation(fields: [journeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  zone            StoreZone               @relation(fields: [zoneId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  selectedProduct Product?                @relation(fields: [selectedProductId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  recommendations StepRecommendation[]
+  interactions    ProductInteraction[]
+  aiExecutions    AIExecution[]
+
+  @@unique([journeyId, stepNumber])
+  @@index([journeyId, stepNumber])
+  @@index([journeyId, status])
+}
+
+model StepRecommendation {
+  id            String             @id @default(cuid())
+  journeyStepId String
+  productId     String
+  type          RecommendationType
+  rank          Int
+  ruleScore     Int
+  reason        String
+  isAiSelected  Boolean
+  createdAt     DateTime           @default(now())
+
+  journeyStep JourneyStep @relation(fields: [journeyStepId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([journeyStepId, productId])
+  @@unique([journeyStepId, rank])
+}
+
+model ProductInteraction {
+  id            String          @id @default(cuid())
+  journeyId     String
+  journeyStepId String
+  productId     String
+  type          InteractionType
+  sequence      Int
+  createdAt     DateTime        @default(now())
+
+  journey     Journey     @relation(fields: [journeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  journeyStep JourneyStep @relation(fields: [journeyStepId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([journeyId, sequence])
+  @@index([journeyId, createdAt])
+  @@index([journeyStepId, type])
+  @@index([productId, type])
+}
+
+model JourneyResult {
+  id               String   @id @default(cuid())
+  journeyId        String   @unique
+  signatureName    String
+  signatureStory   String
+  finalLookSummary String
+  staffSummary     String
+  personaBaseKey   String?
+  sceneKey         String?
+  shareToken       String   @unique
+  usedFallback     Boolean
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  journey Journey             @relation(fields: [journeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  items   JourneyResultItem[]
+}
+
+model JourneyResultItem {
+  id                   String          @id @default(cuid())
+  journeyResultId      String
+  productId            String
+  category             ProductCategory
+  selectionOrder       Int
+  recommendationReason String
+  personaLayerUrl      String?
+  createdAt            DateTime        @default(now())
+
+  journeyResult JourneyResult @relation(fields: [journeyResultId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([journeyResultId, productId])
+  @@unique([journeyResultId, selectionOrder])
+}
+
+model AIExecution {
+  id            String            @id @default(cuid())
+  journeyId     String
+  journeyStepId String?
+  purpose       AIPurpose
+  status        AIExecutionStatus
+  promptVersion String
+  modelName     String?
+  /// Stores only redacted, non-identifying counts and scope metadata.
+  requestJson   String
+  /// Stores only selected IDs and compact validation metadata, or null.
+  responseJson  String?
+  validated     Boolean
+  latencyMs     Int?
+  /// Stores a normalized error code, never provider payloads or stack traces.
+  errorMessage  String?
+  createdAt     DateTime          @default(now())
+
+  journey     Journey      @relation(fields: [journeyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  journeyStep JourneyStep? @relation(fields: [journeyStepId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([journeyId, purpose, createdAt])
+  @@index([status, createdAt])
+}
