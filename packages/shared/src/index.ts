@@ -8,3 +8,4 @@ export {
 } from "./health.js";
 export type { HealthData, HealthResponse } from "./health.js";
 export * from "./journey-types.js";
+export * from "./journey-route.js";

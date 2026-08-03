@@ -28,7 +28,7 @@ const globalForPrisma = globalThis as typeof globalThis & {
   mcmPrisma?: PrismaClient;
 };
 
-function createPrismaClient() {
+export function createPrismaClient() {
   const adapter = new PrismaBetterSqlite3({
     url: resolveDatabaseUrl(env.DATABASE_URL),
   });

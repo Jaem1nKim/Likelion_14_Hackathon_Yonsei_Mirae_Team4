@@ -3,11 +3,11 @@ import type { CheckInRequest, JourneyAggregate } from "@mcm/shared";
 import { AppError } from "../errors/app-error.js";
 import { Prisma } from "../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
-import { mapMinimalJourneyAggregate } from "../mappers/journey-aggregate-mapper.js";
+import { mapJourneyAggregate } from "../mappers/journey-aggregate-mapper.js";
 import {
   createReadyJourneyInTransaction,
   findJourneyByReservationInTransaction,
-  findMinimalJourneyAggregate,
+  findJourneyAggregate,
 } from "../repositories/journey-repository.js";
 import {
   findReservationForCheckInInTransaction,
@@ -99,12 +99,12 @@ export async function checkInReservation(
         return journey.id;
       });
 
-      const aggregate = await findMinimalJourneyAggregate(journeyId);
+      const aggregate = await findJourneyAggregate(journeyId);
       if (!aggregate) {
         throw new AppError(500, "INTERNAL_ERROR", "An unexpected error occurred.");
       }
 
-      return mapMinimalJourneyAggregate(aggregate);
+      return mapJourneyAggregate(aggregate);
     } catch (error) {
       if (!isRetryableCheckInError(error) || attempt === CHECK_IN_ATTEMPTS - 1) {
         throw error;

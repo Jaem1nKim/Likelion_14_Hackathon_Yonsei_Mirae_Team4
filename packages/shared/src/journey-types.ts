@@ -26,6 +26,21 @@ export type CheckInRequest =
   | { qrToken: string; reservationCode?: never }
   | { qrToken?: never; reservationCode: string };
 
+export type CreateInteractionRequest = {
+  interactionId: string;
+  journeyStepId: string;
+  productId: string;
+  type: InteractionType;
+};
+
+export type NextJourneyRequest = {
+  expectedStepNumber: number;
+};
+
+export type FinishJourneyRequest = {
+  expectedStepNumber: number;
+};
+
 export type ReservationView = {
   id: string;
   userId: string;
