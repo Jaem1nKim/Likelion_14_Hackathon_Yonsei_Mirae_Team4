@@ -1,6 +1,10 @@
 import { randomBytes } from "node:crypto";
 
-import type { FinishJourneyRequest, JourneyAggregate } from "@mcm/shared";
+import type {
+  FinishJourneyRequest,
+  InteractionType,
+  JourneyAggregate,
+} from "@mcm/shared";
 
 import { PERSONA_BASE_KEY, isSupportedJourneyStage } from "../../constants/journey.js";
 import { AppError } from "../../errors/app-error.js";
@@ -14,6 +18,14 @@ import {
   finishJourneyInTransaction,
 } from "../../repositories/journey-repository.js";
 import type { DemoUserContext } from "../../types/demo-user.js";
+import { buildSnapshotAiView } from "../ai/ai-input-builder.js";
+import { createAiExecutionInTransaction } from "../ai/ai-execution-service.js";
+import {
+  fallbackResultToAiOutput,
+  generateJourneyResultWithAi,
+  mapResultGenerationToPersistence,
+} from "../ai/journey-result-ai-service.js";
+import { JOURNEY_RESULT_PROMPT_VERSION } from "../ai/journey-result-prompt.js";
 import { generateFallbackResult } from "./fallback-result-generator.js";
 import {
   assertJourneyOwner,
@@ -39,6 +51,12 @@ function minimumSelectionSatisfied(
   return Boolean(hasBag && hasSupporting);
 }
 
+function isDecisionInteraction(
+  type: InteractionType,
+): type is Extract<InteractionType, "SELECTED" | "REJECTED" | "DESELECTED"> {
+  return type === "SELECTED" || type === "REJECTED" || type === "DESELECTED";
+}
+
 export async function finishJourney(
   actor: DemoUserContext,
   journeyId: string,
@@ -62,10 +80,13 @@ export async function finishJourney(
   if (!minimumSelectionSatisfied(plan.steps)) {
     throw new AppError(409, "MINIMUM_SELECTION_REQUIRED", "Select a bag and at least one supporting product.");
   }
+  if (!plan.profileSnapshot) {
+    throw new AppError(500, "INTERNAL_ERROR", "An unexpected error occurred.");
+  }
   const selected = plan.steps
     .filter((step) => step.selectedProduct)
     .map((step) => ({ ...step.selectedProduct!, stepNumber: step.stepNumber, zoneId: step.zoneId }));
-  const result = generateFallbackResult({
+  const fallbackResult = generateFallbackResult({
     startAnswerLabel: plan.reservation.startAnswerLabel,
     products: selected,
     decisionCounts: {
@@ -74,6 +95,62 @@ export async function finishJourney(
       deselected: plan.interactions.filter((item) => item.type === "DESELECTED").length,
     },
   });
+  const finalSelectedProducts = plan.steps.flatMap((step, index) => {
+    if (!step.selectedProduct || !isSupportedJourneyStage(step.stage)) return [];
+    return [{
+      selectionOrder: index + 1,
+      stepNumber: step.stepNumber,
+      stage: step.stage,
+      productId: step.selectedProduct.id,
+      name: step.selectedProduct.name,
+      category: step.stage,
+      color: step.selectedProduct.color,
+      material: step.selectedProduct.material,
+      size: step.selectedProduct.size,
+      capacity: step.selectedProduct.capacity,
+      wearMethod: step.selectedProduct.wearMethod,
+      description: step.selectedProduct.description,
+      tags: step.selectedProduct.tags
+        .filter((tag) => tag.verified)
+        .map((tag) => ({ type: tag.type, name: tag.name, score: tag.score })),
+      sceneBackgroundKey: step.selectedProduct.sceneBackgroundKey,
+    }];
+  });
+  const allowedSceneKeys = [...new Set(
+    finalSelectedProducts.flatMap((product) =>
+      product.sceneBackgroundKey === null ? [] : [product.sceneBackgroundKey],
+    ),
+  )].sort((left, right) => left.localeCompare(right, "en"));
+  const generation = await generateJourneyResultWithAi(
+    {
+      purpose: "JOURNEY_RESULT",
+      promptVersion: JOURNEY_RESULT_PROMPT_VERSION,
+      journeyId,
+      startQuestion: {
+        code: plan.reservation.startQuestionCode,
+        answerCode: plan.reservation.startAnswerCode,
+        answerLabel: plan.reservation.startAnswerLabel,
+      },
+      profileSnapshot: buildSnapshotAiView(plan.profileSnapshot),
+      finalSelectedProducts,
+      decisionHistory: plan.interactions.flatMap((item) => {
+        if (
+          !isSupportedJourneyStage(item.journeyStep.stage) ||
+          !isDecisionInteraction(item.type)
+        ) return [];
+        return [{
+          sequence: item.sequence,
+          stepNumber: item.journeyStep.stepNumber,
+          stage: item.journeyStep.stage,
+          productId: item.productId,
+          type: item.type,
+        }];
+      }),
+      allowedSceneKeys,
+    },
+    fallbackResultToAiOutput(fallbackResult),
+  );
+  const result = mapResultGenerationToPersistence({ fallback: fallbackResult, generation });
   const selectedIds = selected.map((product) => product.id);
 
   for (let attempt = 0; attempt < JOURNEY_TRANSACTION_ATTEMPTS; attempt += 1) {
@@ -124,6 +201,11 @@ export async function finishJourney(
           ...result,
           personaBaseKey: PERSONA_BASE_KEY,
           shareToken,
+        });
+        await createAiExecutionInTransaction(transaction, {
+          journeyId,
+          journeyStepId: null,
+          execution: generation.execution,
         });
         await finishJourneyInTransaction(transaction, {
           journeyId,

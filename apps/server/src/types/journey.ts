@@ -26,6 +26,11 @@ export type CandidateProduct = {
   category: ProductCategory;
   color: string;
   material: string | null;
+  size: string | null;
+  capacity: string | null;
+  wearMethod: string | null;
+  description: string;
+  sceneBackgroundKey: string | null;
   zoneId: string;
   zoneCode: string;
   zoneName: string;

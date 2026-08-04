@@ -262,10 +262,13 @@ export function findJourneyTransitionPlan(journeyId: string) {
       reservation: { select: { startAnswerLabel: true } },
       profileSnapshot: {
         select: {
+          longTermTasteSummary: true,
+          todayIntentSummary: true,
           practicalityScore: true,
           expressionScore: true,
           noveltyScore: true,
           preferencesJson: true,
+          behaviorSummaryJson: true,
         },
       },
       steps: {
@@ -277,11 +280,17 @@ export function findJourneyTransitionPlan(journeyId: string) {
           status: true,
           zoneId: true,
           selectedProductId: true,
+          selectedProduct: { select: journeyProductSelect },
         },
       },
       interactions: {
         where: { type: "REJECTED" },
-        select: { productId: true },
+        orderBy: [{ sequence: "asc" }],
+        select: {
+          productId: true,
+          product: { select: { name: true } },
+          journeyStep: { select: { stage: true } },
+        },
       },
       result: { select: { id: true } },
     },
@@ -299,7 +308,24 @@ export function findJourneyResultPlan(journeyId: string) {
       status: true,
       currentStage: true,
       currentStepNumber: true,
-      reservation: { select: { startAnswerLabel: true } },
+      reservation: {
+        select: {
+          startQuestionCode: true,
+          startAnswerCode: true,
+          startAnswerLabel: true,
+        },
+      },
+      profileSnapshot: {
+        select: {
+          longTermTasteSummary: true,
+          todayIntentSummary: true,
+          practicalityScore: true,
+          expressionScore: true,
+          noveltyScore: true,
+          preferencesJson: true,
+          behaviorSummaryJson: true,
+        },
+      },
       steps: {
         orderBy: [{ stepNumber: "asc" }],
         select: {
@@ -315,7 +341,12 @@ export function findJourneyResultPlan(journeyId: string) {
       interactions: {
         where: { type: { in: ["SELECTED", "REJECTED", "DESELECTED"] } },
         orderBy: [{ sequence: "asc" }],
-        select: { type: true },
+        select: {
+          sequence: true,
+          productId: true,
+          type: true,
+          journeyStep: { select: { stepNumber: true, stage: true } },
+        },
       },
       result: { select: { id: true } },
     },
@@ -448,6 +479,8 @@ export function createFallbackStepInTransaction(
     heritageTitle: string | null;
     heritageText: string | null;
     canFinishJourney: boolean;
+    usedFallback: boolean;
+    isAiSelected: boolean;
     recommendations: Array<{
       productId: string;
       type: "MATCH" | "COMPARE" | "CHALLENGE";
@@ -469,11 +502,11 @@ export function createFallbackStepInTransaction(
       heritageTitle: data.heritageTitle,
       heritageText: data.heritageText,
       canFinishJourney: data.canFinishJourney,
-      usedFallback: true,
+      usedFallback: data.usedFallback,
       recommendations: {
         create: data.recommendations.map((recommendation) => ({
           ...recommendation,
-          isAiSelected: false,
+          isAiSelected: data.isAiSelected,
         })),
       },
     },
@@ -560,6 +593,7 @@ export function createJourneyResultInTransaction(
     personaBaseKey: string | null;
     sceneKey: string | null;
     shareToken: string;
+    usedFallback: boolean;
     items: Array<{
       productId: string;
       category: "BAG" | "APPAREL" | "SHOES" | "ACCESSORY";
@@ -579,7 +613,7 @@ export function createJourneyResultInTransaction(
       personaBaseKey: data.personaBaseKey,
       sceneKey: data.sceneKey,
       shareToken: data.shareToken,
-      usedFallback: true,
+      usedFallback: data.usedFallback,
       items: { create: data.items },
     },
     select: { id: true },

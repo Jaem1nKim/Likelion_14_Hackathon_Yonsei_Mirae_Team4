@@ -15,6 +15,20 @@ import {
   findJourneyTransitionPlan,
 } from "../../repositories/journey-repository.js";
 import type { DemoUserContext } from "../../types/demo-user.js";
+import { isSupportedJourneyStage } from "../../constants/journey.js";
+import {
+  buildAllowedZones,
+  buildCandidateAiViews,
+  buildSnapshotAiView,
+  scopeCandidatesToFallbackZone,
+} from "../ai/ai-input-builder.js";
+import { createAiExecutionInTransaction } from "../ai/ai-execution-service.js";
+import {
+  fallbackStepToAiOutput,
+  generateJourneyStepWithAi,
+  mapStepGenerationToPersistence,
+} from "../ai/journey-step-ai-service.js";
+import { JOURNEY_STEP_PROMPT_VERSION } from "../ai/journey-step-prompt.js";
 import { scoreJourneyCandidates } from "./candidate-engine.js";
 import { generateFallbackStep } from "./fallback-step-generator.js";
 import { parseJourneyPreferences } from "./journey-preference-service.js";
@@ -77,15 +91,60 @@ export async function advanceJourney(
     stage: target.stage,
     excludedProductIds: [...new Set(excludedProductIds)],
   });
-  const step = generateFallbackStep({
+  const scoredCandidates = scoreJourneyCandidates(candidates, {
+    practicalityScore: plan.profileSnapshot.practicalityScore,
+    expressionScore: plan.profileSnapshot.expressionScore,
+    noveltyScore: plan.profileSnapshot.noveltyScore,
+    preferences: parseJourneyPreferences(plan.profileSnapshot.preferencesJson),
+  });
+  const fallbackStep = generateFallbackStep({
     stage: target.stage,
     stepNumber: target.stepNumber,
-    candidates: scoreJourneyCandidates(candidates, {
-      practicalityScore: plan.profileSnapshot.practicalityScore,
-      expressionScore: plan.profileSnapshot.expressionScore,
-      noveltyScore: plan.profileSnapshot.noveltyScore,
-      preferences: parseJourneyPreferences(plan.profileSnapshot.preferencesJson),
-    }),
+    candidates: scoredCandidates,
+  });
+  const scopedCandidates = scopeCandidatesToFallbackZone(
+    scoredCandidates,
+    fallbackStep.zoneId,
+  );
+  const generation = await generateJourneyStepWithAi(
+    {
+      purpose: "JOURNEY_STEP",
+      promptVersion: JOURNEY_STEP_PROMPT_VERSION,
+      journeyId,
+      profileSnapshot: buildSnapshotAiView(plan.profileSnapshot),
+      currentStage: target.stage,
+      serverCanFinishJourney: fallbackStep.canFinishJourney,
+      candidateProducts: buildCandidateAiViews(scopedCandidates, plan.storeId),
+      previousSelectedProducts: plan.steps.flatMap((item) => {
+        if (!item.selectedProduct || !isSupportedJourneyStage(item.stage)) return [];
+        return [{
+          stepNumber: item.stepNumber,
+          stage: item.stage,
+          productId: item.selectedProduct.id,
+          name: item.selectedProduct.name,
+          color: item.selectedProduct.color,
+          tags: item.selectedProduct.tags
+            .filter((tag) => tag.verified)
+            .map((tag) => ({ type: tag.type, name: tag.name, score: tag.score })),
+        }];
+      }),
+      previousRejectedProducts: plan.interactions.flatMap((item) => {
+        if (!isSupportedJourneyStage(item.journeyStep.stage)) return [];
+        return [{
+          stage: item.journeyStep.stage,
+          productId: item.productId,
+          name: item.product.name,
+        }];
+      }),
+      allowedZones: buildAllowedZones(scopedCandidates, plan.storeId),
+    },
+    fallbackStepToAiOutput(fallbackStep),
+  );
+  const step = mapStepGenerationToPersistence({
+    stage: target.stage,
+    stepNumber: target.stepNumber,
+    candidates: scopedCandidates,
+    generation,
   });
 
   for (let attempt = 0; attempt < JOURNEY_TRANSACTION_ATTEMPTS; attempt += 1) {
@@ -119,7 +178,12 @@ export async function advanceJourney(
         }
         const now = new Date();
         await completeStepInTransaction(transaction, activeStep.id, now);
-        await createFallbackStepInTransaction(transaction, journeyId, step);
+        const createdStep = await createFallbackStepInTransaction(transaction, journeyId, step);
+        await createAiExecutionInTransaction(transaction, {
+          journeyId,
+          journeyStepId: createdStep.id,
+          execution: generation.execution,
+        });
         await advanceJourneyInTransaction(transaction, journeyId, target.stage, target.stepNumber);
       });
       return getJourneyAggregateInternal(journeyId);

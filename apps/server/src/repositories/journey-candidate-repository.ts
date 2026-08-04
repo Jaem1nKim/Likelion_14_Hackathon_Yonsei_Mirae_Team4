@@ -12,6 +12,11 @@ const candidateSelect = {
       category: true,
       color: true,
       material: true,
+      size: true,
+      capacity: true,
+      wearMethod: true,
+      description: true,
+      sceneBackgroundKey: true,
       tags: {
         select: { type: true, name: true, score: true, verified: true },
         orderBy: [{ type: "asc" }, { score: "desc" }, { name: "asc" }],

@@ -420,11 +420,23 @@ describe("Journey finish and aggregate", () => {
     expect(finished.interactions.map((item) => item.sequence)).toEqual([1, 2]);
   });
 
-  it("never creates AIExecution rows", async () => {
+  it("stores redacted fallback AIExecution rows with the generated step and result", async () => {
     const before = await prisma.aIExecution.count();
     const aggregate = await selectFirst(await reachApparel());
     await api.post(`/api/journeys/${aggregate.journey.id}/finish`).set(DEMO_USER_HEADER_NAME, STABLE_USER_ID).send({ expectedStepNumber: 2 }).expect(200);
-    expect(await prisma.aIExecution.count()).toBe(before);
+    const executions = await prisma.aIExecution.findMany({
+      where: { journeyId: aggregate.journey.id },
+      orderBy: { createdAt: "asc" },
+    });
+    expect(await prisma.aIExecution.count()).toBe(before + 3);
+    expect(executions.map((item) => item.status)).toEqual(["FALLBACK", "FALLBACK", "FALLBACK"]);
+    expect(executions.every((item) => item.validated === false)).toBe(true);
+    expect(executions.every((item) => item.errorMessage === "AI_DISABLED")).toBe(true);
+    expect(executions.map((item) => JSON.parse(item.requestJson))).toEqual([
+      { stage: "BAG", candidateCount: 3, selectedCount: 0, rejectedCount: 0 },
+      { stage: "APPAREL", candidateCount: 3, selectedCount: 1, rejectedCount: 0 },
+      { selectedProductCount: 2, decisionEventCount: 2, allowedSceneKeyCount: 1 },
+    ]);
   });
 });
 
