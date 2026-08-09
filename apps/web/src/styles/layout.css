@@ -1,0 +1,147 @@
+.site-shell {
+  min-height: 100vh;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 14px max(20px, calc((100vw - 1040px) / 2));
+  border-bottom: 1px solid rgba(29, 28, 26, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.brand-product {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.header-user {
+  max-width: 42vw;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-shell {
+  width: min(calc(100% - 32px), 880px);
+  margin: 0 auto;
+  padding: 52px 0 72px;
+}
+
+.site-footer {
+  padding: 24px 20px 32px;
+  color: #77736c;
+  font-size: 12px;
+  text-align: center;
+}
+
+.page-header {
+  max-width: 700px;
+  margin-bottom: 36px;
+}
+
+.page-header h1 {
+  max-width: 18ch;
+  margin-bottom: 14px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 42px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.eyebrow {
+  margin-bottom: 10px;
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.page-description {
+  max-width: 630px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.section-heading {
+  margin: 36px 0 18px;
+}
+
+.section-heading h2 {
+  margin-bottom: 6px;
+  font-size: 20px;
+}
+
+.section-heading p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.page-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+}
+
+.page-actions-split {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    min-height: 64px;
+  }
+
+  .brand-product {
+    display: none;
+  }
+
+  .page-shell {
+    width: min(calc(100% - 28px), 880px);
+    padding: 34px 0 52px;
+  }
+
+  .page-header {
+    margin-bottom: 28px;
+  }
+
+  .page-header h1 {
+    font-size: 33px;
+  }
+
+  .page-description {
+    font-size: 15px;
+  }
+
+  .page-actions,
+  .page-actions-split {
+    flex-direction: column-reverse;
+  }
+
+  .page-actions .button {
+    width: 100%;
+  }
+}

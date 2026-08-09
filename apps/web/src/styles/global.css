@@ -1,0 +1,86 @@
+:root {
+  font-family: Inter, Pretendard, "Noto Sans KR", "Segoe UI", sans-serif;
+  color: #1d1c1a;
+  background: #f7f7f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  letter-spacing: 0;
+  --ink: #1d1c1a;
+  --muted: #68655f;
+  --line: #d9d7d1;
+  --surface: #ffffff;
+  --surface-soft: #f0f0eb;
+  --accent: #8a6735;
+  --accent-dark: #5c4629;
+  --success: #2f6d4e;
+  --danger: #a33a2b;
+  --focus: #1b67c9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: #f7f7f4;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    linear-gradient(180deg, #ffffff 0, #f7f7f4 360px, #f7f7f4 100%);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: 0;
+}
+
+button {
+  color: inherit;
+}
+
+button,
+a,
+input,
+summary {
+  outline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  overflow-wrap: anywhere;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+code,
+output {
+  font-family: "SFMono-Regular", Consolas, monospace;
+}

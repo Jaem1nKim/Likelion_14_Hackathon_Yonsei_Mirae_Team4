@@ -1,0 +1,450 @@
+.login-intro {
+  padding: 22px 0 12px;
+}
+
+.user-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.avatar {
+  position: relative;
+  display: grid;
+  flex: 0 0 58px;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-right: 14px;
+  overflow: hidden;
+  border: 1px solid #c9c6bf;
+  border-radius: 50%;
+  color: var(--accent-dark);
+  font-family: Georgia, serif;
+  font-size: 22px;
+  background: var(--surface-soft);
+}
+
+.avatar img {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.consent-form {
+  display: grid;
+  gap: 12px;
+}
+
+.consent-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.consent-row input {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--accent-dark);
+}
+
+.consent-row span {
+  display: grid;
+  gap: 7px;
+}
+
+.consent-row small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.profile-summary {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.4fr) minmax(0, 1fr);
+  gap: 28px;
+  padding: 28px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.profile-summary h2 {
+  margin-bottom: 0;
+  font-family: Georgia, serif;
+  font-size: 30px;
+}
+
+.profile-summary > p {
+  margin-bottom: 0;
+  color: #4f4c47;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.profile-section {
+  padding: 12px 0 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 30px;
+}
+
+.score-item > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.score-item strong {
+  font-size: 20px;
+}
+
+.score-track {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #deddd8;
+}
+
+.score-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-dark), #b28c4f);
+}
+
+.preference-groups {
+  display: grid;
+  gap: 18px;
+}
+
+.preference-group {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.preference-group h3 {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  padding: 7px 10px;
+  border: 1px solid #c9c6bf;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.tag small {
+  margin-left: 5px;
+  color: var(--accent-dark);
+  font-weight: 750;
+}
+
+.store-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.store-card {
+  align-items: stretch;
+  min-height: 150px;
+}
+
+.store-image {
+  flex: 0 0 108px;
+  width: 108px;
+  height: 112px;
+  margin-right: 16px;
+  object-fit: cover;
+  background: var(--surface-soft);
+}
+
+.store-card .choice-content small {
+  margin-top: 7px;
+  line-height: 1.5;
+}
+
+.visit-time-fieldset {
+  margin-top: 34px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.input-grid label {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.input-grid input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #aaa79f;
+  border-radius: 4px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.reservation-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-bottom: 36px;
+  padding: 20px;
+  border-left: 4px solid var(--accent);
+  background: #ecece7;
+}
+
+.reservation-summary div {
+  display: grid;
+  gap: 5px;
+}
+
+.reservation-summary span,
+.reservation-summary small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.question-fieldset legend {
+  margin-bottom: 22px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.answer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.answer-card {
+  align-items: flex-start;
+  min-height: 155px;
+}
+
+.answer-card .choice-content strong {
+  line-height: 1.5;
+}
+
+.passport {
+  overflow: hidden;
+  border: 1px solid #b9b6ae;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.passport-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px;
+  color: #fff;
+  background: #1d1c1a;
+}
+
+.passport-header .eyebrow {
+  color: #d2b27b;
+}
+
+.passport-header h2 {
+  margin-bottom: 0;
+  font-family: Georgia, serif;
+  font-size: 30px;
+}
+
+.status-badge {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  border: 1px solid #716d65;
+  border-radius: 3px;
+  color: #eee9df;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.status-completed,
+.status-checked_in {
+  border-color: #6ba185;
+  color: #c9ead8;
+}
+
+.status-cancelled,
+.status-expired {
+  border-color: #be766d;
+  color: #f0c9c4;
+}
+
+.passport-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 28px;
+}
+
+.passport-grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.passport-grid span,
+.passport-grid small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.passport-grid strong {
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.checkin-block {
+  padding: 28px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  background: #f0f0eb;
+}
+
+.checkin-block h3 {
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.qr-ready {
+  margin-bottom: 16px;
+  color: var(--success);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reservation-code {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto 18px;
+  color: var(--ink);
+  font-size: 38px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.checkin-block > p:last-of-type {
+  margin-bottom: 18px;
+  color: #4f4c47;
+}
+
+.checkin-block details {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.checkin-block summary {
+  cursor: pointer;
+}
+
+.checkin-block code {
+  display: block;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+
+.passport-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.health-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.health-list div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.health-list dt { color: var(--muted); }
+.health-list dd { margin: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 760px) {
+  .user-grid,
+  .store-grid,
+  .answer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .answer-card {
+    min-height: 116px;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-summary,
+  .score-grid,
+  .input-grid,
+  .reservation-summary,
+  .passport-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preference-group {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .preference-group h3 {
+    margin-top: 0;
+  }
+
+  .store-card {
+    min-height: 130px;
+  }
+
+  .store-image {
+    flex-basis: 84px;
+    width: 84px;
+    height: 96px;
+  }
+
+  .passport-header,
+  .passport-grid,
+  .checkin-block {
+    padding: 21px;
+  }
+
+  .reservation-code {
+    font-size: 32px;
+  }
+}

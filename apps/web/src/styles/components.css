@@ -1,0 +1,241 @@
+.button {
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.button-primary {
+  color: #ffffff;
+  background: var(--ink);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: #3a3834;
+}
+
+.button-primary:disabled {
+  color: #92908b;
+  background: #dfded9;
+}
+
+.button-secondary {
+  border-color: #bdbab2;
+  background: #ffffff;
+}
+
+.button-secondary:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.button-text {
+  color: var(--muted);
+  background: transparent;
+}
+
+.state-panel {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  min-height: 140px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.state-panel p {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.state-panel-error {
+  border-left: 4px solid var(--danger);
+}
+
+.loading-mark {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #d0cec7;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: loading-rotate 0.8s linear infinite;
+}
+
+@keyframes loading-rotate {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-mark { animation: none; }
+}
+
+.choice-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.choice-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 96px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.choice-card:hover {
+  border-color: #8a867d;
+}
+
+.choice-card.is-selected {
+  border-color: var(--accent-dark);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.choice-content {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  line-height: 1.4;
+}
+
+.choice-content strong {
+  font-size: 16px;
+}
+
+.choice-content span,
+.choice-content small {
+  color: var(--muted);
+}
+
+.selection-label {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 16px;
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.plain-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.plain-fieldset legend {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 0;
+  font-size: 19px;
+  font-weight: 750;
+}
+
+.form-error,
+.notice {
+  margin: 18px 0 0;
+  padding: 13px 15px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.form-error {
+  color: #76271d;
+  background: #fff0ed;
+}
+
+.notice {
+  margin-top: -12px;
+  margin-bottom: 24px;
+  color: #314e3f;
+  background: #eaf4ed;
+}
+
+.progress-indicator {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-width: 560px;
+  margin: 0 0 42px;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-indicator li {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  color: #8c8982;
+}
+
+.progress-indicator li::before {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  left: 24px;
+  height: 1px;
+  background: #d4d2cc;
+  content: "";
+}
+
+.progress-indicator li:last-child::before {
+  display: none;
+}
+
+.progress-indicator span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #bcb9b2;
+  border-radius: 50%;
+  font-size: 12px;
+  background: #f7f7f4;
+}
+
+.progress-indicator small {
+  font-size: 11px;
+}
+
+.progress-indicator .is-complete {
+  color: var(--ink);
+}
+
+.progress-indicator .is-complete span {
+  border-color: var(--accent-dark);
+  color: #fff;
+  background: var(--accent-dark);
+}
+
+.progress-indicator .is-complete::before {
+  background: var(--accent);
+}
+
+@media (max-width: 480px) {
+  .progress-indicator {
+    margin-bottom: 32px;
+  }
+
+  .progress-indicator small {
+    font-size: 10px;
+  }
+
+  .choice-card {
+    padding: 15px;
+  }
+}
