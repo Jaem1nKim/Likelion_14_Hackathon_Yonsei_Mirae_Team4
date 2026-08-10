@@ -9,7 +9,7 @@ import { AppRouter } from "../router/app-router";
 import { ReservationDraftProvider } from "../state/reservation-draft";
 import { customer, success } from "./fixtures";
 
-export function mockFetchQueue(...responses: Array<Response | Error>) {
+export function mockFetchQueue(...responses: Array<Response | Error | Promise<Response>>) {
   const queue = [...responses];
   const mock = vi.fn<
     (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
@@ -21,7 +21,7 @@ export function mockFetchQueue(...responses: Array<Response | Error>) {
     if (next instanceof Error) {
       throw next;
     }
-    return next;
+    return await next;
   });
   vi.stubGlobal("fetch", mock);
   return mock;
@@ -31,14 +31,16 @@ export function authenticate() {
   localStorage.setItem(DEMO_USER_STORAGE_KEY, customer.id);
 }
 
-export function authenticatedResponses(...pageResponses: Response[]) {
+export function authenticatedResponses(
+  ...pageResponses: Array<Response | Error | Promise<Response>>
+) {
   return [success(customer), ...pageResponses];
 }
 
-export function renderApp(route: string) {
+export function renderApp(route: string, state?: unknown) {
   return render(
     <MemoryRouter
-      initialEntries={[route]}
+      initialEntries={[state === undefined ? route : { pathname: route, state }]}
       future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
     >
       <DemoUserProvider>

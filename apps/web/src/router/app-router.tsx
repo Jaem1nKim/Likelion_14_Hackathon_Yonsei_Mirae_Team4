@@ -19,6 +19,9 @@ import { PassportPage } from "../pages/PassportPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { QuestionPage } from "../pages/QuestionPage";
 import { ReservePage } from "../pages/ReservePage";
+import { JourneyIntroPage } from "../pages/JourneyIntroPage";
+import { JourneyPage } from "../pages/JourneyPage";
+import { StoreCheckInPage } from "../pages/StoreCheckInPage";
 
 function RequireCustomer() {
   const { user, isInitializing } = useDemoUser();
@@ -100,6 +103,12 @@ export function AppRouter() {
         <Route path="/reserve" element={<ReservePage />} />
         <Route path="/question" element={<QuestionPage />} />
         <Route path="/passport/:reservationId" element={<PassportPage />} />
+        <Route path="/store/check-in" element={<StoreCheckInPage />} />
+        <Route path="/journey/:journeyId/intro" element={<JourneyIntroPage />} />
+        <Route path="/journey/:journeyId/select" element={<JourneyPage view="select" />} />
+        <Route path="/journey/:journeyId/route" element={<JourneyPage view="route" />} />
+        <Route path="/journey/:journeyId/progress" element={<JourneyPage view="progress" />} />
+        <Route path="/journey/:journeyId/decision" element={<JourneyPage view="decision" />} />
       </Route>
       <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>

@@ -41,7 +41,7 @@ function formatDateTime(value: string) {
 
 export function QuestionPage() {
   const navigate = useNavigate();
-  const { draft, clearDraft, ensureIdempotencyKey } = useReservationDraft();
+  const { draft, ensureIdempotencyKey } = useReservationDraft();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,6 @@ export function QuestionPage() {
 
     try {
       const reservation = await createReservation(body, ensureIdempotencyKey());
-      clearDraft();
       navigate(`/passport/${encodeURIComponent(reservation.id)}`, { replace: true });
     } catch (caught) {
       setError(errorMessage(caught));

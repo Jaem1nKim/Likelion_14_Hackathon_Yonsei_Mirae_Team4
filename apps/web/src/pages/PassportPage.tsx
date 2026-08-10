@@ -46,6 +46,10 @@ export function PassportPage() {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
+    clearDraft();
+  }, [clearDraft]);
+
+  useEffect(() => {
     if (!reservationId) {
       setError("예약 ID가 없습니다.");
       setIsLoading(false);
@@ -130,6 +134,17 @@ export function PassportPage() {
           </article>
 
           <div className="page-actions passport-actions">
+            {reservation.status === "RESERVED" && (
+              <button
+                className="button button-primary"
+                type="button"
+                onClick={() => navigate("/store/check-in", {
+                  state: { reservationCode: reservation.reservationCode },
+                })}
+              >
+                매장 체크인
+              </button>
+            )}
             <button className="button button-secondary" type="button" onClick={() => navigate("/profile")}>
               프로필로 돌아가기
             </button>

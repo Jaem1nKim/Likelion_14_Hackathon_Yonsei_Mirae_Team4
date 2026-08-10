@@ -106,6 +106,7 @@ export function ReservePage() {
       )}
       {!isLoading && !error && stores.length > 0 && (
         <form
+          noValidate
           onSubmit={(event) => {
             event.preventDefault();
             handleContinue();
