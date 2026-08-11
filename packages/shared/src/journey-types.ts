@@ -154,6 +154,59 @@ export type CustomerJourneyResultView = {
   updatedAt: string;
 };
 
+export type SharedJourneyResultView = {
+  signatureName: string;
+  signatureStory: string;
+  finalLookSummary: string;
+  sceneKey: string | null;
+  items: Array<{
+    productId: string;
+    name: string;
+    category: ProductCategory;
+    color: string;
+    imageUrl: string;
+    recommendationReason: string;
+    personaLayerUrl: string | null;
+    selectionOrder: number;
+  }>;
+  createdAt: string;
+};
+
+export type StaffReservationListItem = {
+  reservationId: string;
+  reservationCode: string;
+  reservedAt: string;
+  reservationStatus: ReservationStatus;
+  store: StoreView;
+  customer: {
+    id: string;
+    name: string;
+    profileType: string | null;
+  };
+  journey: {
+    id: string;
+    status: JourneyStatus;
+    currentStage: JourneyStage;
+    currentStepNumber: number;
+  } | null;
+};
+
+export type StaffJourneyView = {
+  journey: JourneyView;
+  reservation: JourneyReservationSummary;
+  customer: {
+    id: string;
+    name: string;
+    profileType: string | null;
+  };
+  profileSnapshot: JourneyProfileSnapshotView | null;
+  steps: JourneyStepView[];
+  interactions: ProductInteractionView[];
+  result: (CustomerJourneyResultView & {
+    staffSummary: string;
+  }) | null;
+};
+
 export type JourneyAggregate = {
   journey: JourneyView;
   reservation: JourneyReservationSummary;

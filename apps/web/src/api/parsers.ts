@@ -1,7 +1,11 @@
 import type {
   ConsentResponse,
+  CustomerJourneyResultView,
   DemoUser,
   JourneyAggregate,
+  SharedJourneyResultView,
+  StaffJourneyView,
+  StaffReservationListItem,
   JourneyStage,
   JourneyStatus,
   JourneyStepStatus,
@@ -462,5 +466,186 @@ export function parseJourneyAggregate(value: unknown): JourneyAggregate {
       createdAt: string(result.createdAt, "result.createdAt"),
       updatedAt: string(result.updatedAt, "result.updatedAt"),
     },
+  };
+}
+
+export function parseCustomerJourneyResult(
+  value: unknown,
+): CustomerJourneyResultView {
+  const result = record(value, "result");
+  return {
+    id: string(result.id, "result.id"),
+    journeyId: string(result.journeyId, "result.journeyId"),
+    signatureName: string(result.signatureName, "result.signatureName"),
+    signatureStory: string(result.signatureStory, "result.signatureStory"),
+    finalLookSummary: string(result.finalLookSummary, "result.finalLookSummary"),
+    personaBaseKey: nullableString(result.personaBaseKey, "result.personaBaseKey"),
+    sceneKey: nullableString(result.sceneKey, "result.sceneKey"),
+    shareToken: string(result.shareToken, "result.shareToken"),
+    usedFallback: boolean(result.usedFallback, "result.usedFallback"),
+    items: array(result.items, "result.items", (item) => {
+      const resultItem = record(item, "result.item");
+      return {
+        id: string(resultItem.id, "result.item.id"),
+        product: parseProduct(resultItem.product),
+        category: productCategory(resultItem.category),
+        selectionOrder: number(resultItem.selectionOrder, "result.item.selectionOrder"),
+        recommendationReason: string(
+          resultItem.recommendationReason,
+          "result.item.recommendationReason",
+        ),
+        personaLayerUrl: nullableString(
+          resultItem.personaLayerUrl,
+          "result.item.personaLayerUrl",
+        ),
+      };
+    }),
+    createdAt: string(result.createdAt, "result.createdAt"),
+    updatedAt: string(result.updatedAt, "result.updatedAt"),
+  };
+}
+
+export function parseSharedJourneyResult(
+  value: unknown,
+): SharedJourneyResultView {
+  const result = record(value, "sharedResult");
+  return {
+    signatureName: string(result.signatureName, "sharedResult.signatureName"),
+    signatureStory: string(result.signatureStory, "sharedResult.signatureStory"),
+    finalLookSummary: string(
+      result.finalLookSummary,
+      "sharedResult.finalLookSummary",
+    ),
+    sceneKey: nullableString(result.sceneKey, "sharedResult.sceneKey"),
+    items: array(result.items, "sharedResult.items", (item) => {
+      const resultItem = record(item, "sharedResult.item");
+      return {
+        productId: string(resultItem.productId, "sharedResult.item.productId"),
+        name: string(resultItem.name, "sharedResult.item.name"),
+        category: productCategory(resultItem.category),
+        color: string(resultItem.color, "sharedResult.item.color"),
+        imageUrl: string(resultItem.imageUrl, "sharedResult.item.imageUrl"),
+        recommendationReason: string(
+          resultItem.recommendationReason,
+          "sharedResult.item.recommendationReason",
+        ),
+        personaLayerUrl: nullableString(
+          resultItem.personaLayerUrl,
+          "sharedResult.item.personaLayerUrl",
+        ),
+        selectionOrder: number(
+          resultItem.selectionOrder,
+          "sharedResult.item.selectionOrder",
+        ),
+      };
+    }),
+    createdAt: string(result.createdAt, "sharedResult.createdAt"),
+  };
+}
+
+export function parseStaffReservations(value: unknown): StaffReservationListItem[] {
+  return array(value, "staffReservations", (item) => {
+    const reservation = record(item, "staffReservation");
+    const customer = record(reservation.customer, "staffReservation.customer");
+    const journey =
+      reservation.journey === null
+        ? null
+        : record(reservation.journey, "staffReservation.journey");
+    return {
+      reservationId: string(reservation.reservationId, "staffReservation.reservationId"),
+      reservationCode: string(reservation.reservationCode, "staffReservation.reservationCode"),
+      reservedAt: string(reservation.reservedAt, "staffReservation.reservedAt"),
+      reservationStatus: reservationStatus(reservation.reservationStatus),
+      store: parseStore(reservation.store),
+      customer: {
+        id: string(customer.id, "staffReservation.customer.id"),
+        name: string(customer.name, "staffReservation.customer.name"),
+        profileType: nullableString(customer.profileType, "staffReservation.customer.profileType"),
+      },
+      journey:
+        journey === null
+          ? null
+          : {
+              id: string(journey.id, "staffReservation.journey.id"),
+              status: journeyStatus(journey.status),
+              currentStage: journeyStage(journey.currentStage),
+              currentStepNumber: number(
+                journey.currentStepNumber,
+                "staffReservation.journey.currentStepNumber",
+              ),
+            },
+    };
+  });
+}
+
+export function parseStaffJourney(value: unknown): StaffJourneyView {
+  const source = record(value, "staffJourney");
+  const journey = record(source.journey, "staffJourney.journey");
+  const customer = record(source.customer, "staffJourney.customer");
+  const profile =
+    source.profileSnapshot === null
+      ? null
+      : record(source.profileSnapshot, "staffJourney.profileSnapshot");
+  const result =
+    source.result === null ? null : record(source.result, "staffJourney.result");
+
+  return {
+    journey: {
+      id: string(journey.id, "staffJourney.journey.id"),
+      userId: string(journey.userId, "staffJourney.journey.userId"),
+      reservationId: string(journey.reservationId, "staffJourney.journey.reservationId"),
+      storeId: string(journey.storeId, "staffJourney.journey.storeId"),
+      status: journeyStatus(journey.status),
+      currentStage: journeyStage(journey.currentStage),
+      currentStepNumber: number(journey.currentStepNumber, "staffJourney.journey.currentStepNumber"),
+      startedAt: nullableString(journey.startedAt, "staffJourney.journey.startedAt"),
+      finishedAt: nullableString(journey.finishedAt, "staffJourney.journey.finishedAt"),
+      cancelledAt: nullableString(journey.cancelledAt, "staffJourney.journey.cancelledAt"),
+      createdAt: string(journey.createdAt, "staffJourney.journey.createdAt"),
+      updatedAt: string(journey.updatedAt, "staffJourney.journey.updatedAt"),
+    },
+    reservation: parseJourneyReservation(source.reservation),
+    customer: {
+      id: string(customer.id, "staffJourney.customer.id"),
+      name: string(customer.name, "staffJourney.customer.name"),
+      profileType: nullableString(customer.profileType, "staffJourney.customer.profileType"),
+    },
+    profileSnapshot:
+      profile === null
+        ? null
+        : {
+            longTermTasteSummary: string(profile.longTermTasteSummary, "staffJourney.profileSnapshot.longTermTasteSummary"),
+            todayIntentSummary: string(profile.todayIntentSummary, "staffJourney.profileSnapshot.todayIntentSummary"),
+            practicalityScore: number(profile.practicalityScore, "staffJourney.profileSnapshot.practicalityScore"),
+            expressionScore: number(profile.expressionScore, "staffJourney.profileSnapshot.expressionScore"),
+            noveltyScore: number(profile.noveltyScore, "staffJourney.profileSnapshot.noveltyScore"),
+            preferences: array(profile.preferences, "staffJourney.profileSnapshot.preferences", (item) => {
+              const preference = record(item, "staffJourney.preference");
+              return {
+                type: preferenceType(preference.type),
+                value: string(preference.value, "staffJourney.preference.value"),
+                score: number(preference.score, "staffJourney.preference.score"),
+              };
+            }),
+          },
+    steps: array(source.steps, "staffJourney.steps", parseJourneyStep),
+    interactions: array(source.interactions, "staffJourney.interactions", (item) => {
+      const interaction = record(item, "staffJourney.interaction");
+      return {
+        id: string(interaction.id, "staffJourney.interaction.id"),
+        journeyStepId: string(interaction.journeyStepId, "staffJourney.interaction.journeyStepId"),
+        productId: string(interaction.productId, "staffJourney.interaction.productId"),
+        type: interactionType(interaction.type),
+        sequence: number(interaction.sequence, "staffJourney.interaction.sequence"),
+        createdAt: string(interaction.createdAt, "staffJourney.interaction.createdAt"),
+      };
+    }),
+    result:
+      result === null
+        ? null
+        : {
+            ...parseCustomerJourneyResult(result),
+            staffSummary: string(result.staffSummary, "staffJourney.result.staffSummary"),
+          },
   };
 }

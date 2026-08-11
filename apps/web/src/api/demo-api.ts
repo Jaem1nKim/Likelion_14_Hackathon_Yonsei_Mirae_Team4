@@ -10,6 +10,13 @@ export function getCustomerDemoUsers(signal?: AbortSignal) {
   });
 }
 
+export function getStaffDemoUsers(signal?: AbortSignal) {
+  return apiRequest("/demo/users?role=STAFF", parseDemoUsers, {
+    signal,
+    includeDemoUser: false,
+  });
+}
+
 export function loginDemoUser(userId: string, signal?: AbortSignal) {
   const body: DemoLoginRequest = { userId };
   return apiRequest("/demo/login", parseDemoUser, {

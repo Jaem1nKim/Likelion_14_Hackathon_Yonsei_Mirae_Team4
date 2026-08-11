@@ -1,6 +1,6 @@
 import type { DemoUser } from "@mcm/shared";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { errorMessage } from "../api/api-client";
 import { getUserConsent } from "../api/consent-api";
@@ -136,6 +136,7 @@ export function LoginPage() {
           </div>
         </>
       )}
+      <p className="login-switch"><Link to="/staff/login">직원용 화면으로 이동</Link></p>
     </AppLayout>
   );
 }

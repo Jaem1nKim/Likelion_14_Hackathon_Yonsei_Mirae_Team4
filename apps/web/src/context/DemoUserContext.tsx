@@ -35,10 +35,6 @@ export function DemoUserProvider({ children }: PropsWithChildren) {
 
   const login = useCallback(async (userId: string) => {
     const validatedUser = await loginDemoUser(userId);
-    if (validatedUser.role !== "CUSTOMER") {
-      throw new Error("고객 프로필만 사용할 수 있습니다.");
-    }
-
     localStorage.setItem(DEMO_USER_STORAGE_KEY, validatedUser.id);
     setUser(validatedUser);
     return validatedUser;
@@ -55,10 +51,6 @@ export function DemoUserProvider({ children }: PropsWithChildren) {
 
     void loginDemoUser(storedId, controller.signal)
       .then((validatedUser) => {
-        if (validatedUser.role !== "CUSTOMER") {
-          logout();
-          return;
-        }
         setUser(validatedUser);
       })
       .catch((error: unknown) => {

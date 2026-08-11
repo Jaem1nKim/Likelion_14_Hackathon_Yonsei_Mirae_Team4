@@ -83,3 +83,18 @@ export const requireCustomer: RequestHandler = (request, _response, next) => {
 
   next();
 };
+
+export const requireStaff: RequestHandler = (request, _response, next) => {
+  if (request.demoUser?.role !== "STAFF") {
+    next(
+      new AppError(
+        403,
+        "FORBIDDEN",
+        "Only an active staff user can access this resource.",
+      ),
+    );
+    return;
+  }
+
+  next();
+};

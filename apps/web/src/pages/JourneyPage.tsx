@@ -27,7 +27,7 @@ const STAGE_LABEL = { BAG: "BAG", APPAREL: "APPAREL", ACCESSORY: "ACCESSORY" } a
 type Props = { view: ActiveJourneyView };
 type Operation = "next" | "finish" | null;
 
-function CompletedState() {
+function CompletedState({ journeyId }: { journeyId: string }) {
   const navigate = useNavigate();
   return (
     <section className="journey-complete" aria-labelledby="journey-complete-title">
@@ -38,9 +38,10 @@ function CompletedState() {
         <button className="button button-secondary" type="button" onClick={() => navigate("/profile")}> 
           프로필로 돌아가기
         </button>
-        <span className="completion-mark" aria-label="Journey 완료">완료</span>
+        <button className="button button-primary" type="button" onClick={() => navigate(`/journey/${encodeURIComponent(journeyId)}/result`)}>
+          Journey 결과 보기
+        </button>
       </div>
-      <p className="completion-note">상세 Signature는 다음 화면 단계에서 제공됩니다.</p>
     </section>
   );
 }
@@ -75,7 +76,7 @@ export function JourneyPage({ view }: Props) {
   if (!aggregate || !screen) {
     return <AppLayout><ErrorState message="Journey 상태를 복원할 수 없습니다." onRetry={retry} /></AppLayout>;
   }
-  if (screen === "RESULT") return <AppLayout><CompletedState /></AppLayout>;
+  if (screen === "RESULT") return <AppLayout><CompletedState journeyId={aggregate.journey.id} /></AppLayout>;
   const step = aggregate.currentStep;
   if (screen === "INTRO" || !step) return <AppLayout><LoadingState message="올바른 Journey 화면으로 이동하고 있습니다." /></AppLayout>;
 

@@ -1,9 +1,13 @@
 import type {
   ConsentResponse,
+  CustomerJourneyResultView,
   DemoUser,
   JourneyAggregate,
   JourneyStage,
   ReservationView,
+  SharedJourneyResultView,
+  StaffJourneyView,
+  StaffReservationListItem,
   StoreView,
   UserProfileResponse,
 } from "@mcm/shared";
@@ -262,3 +266,46 @@ export function journeyAggregate(
     } : null,
   };
 }
+
+export const journeyResult = journeyAggregate("FINISHED").result as CustomerJourneyResultView;
+
+export const sharedJourneyResult: SharedJourneyResultView = {
+  signatureName: journeyResult.signatureName,
+  signatureStory: journeyResult.signatureStory,
+  finalLookSummary: journeyResult.finalLookSummary,
+  sceneKey: journeyResult.sceneKey,
+  items: journeyResult.items.map((item) => ({
+    productId: item.product.id,
+    name: item.product.name,
+    category: item.category,
+    color: item.product.color,
+    imageUrl: item.product.imageUrl,
+    recommendationReason: item.recommendationReason,
+    personaLayerUrl: item.personaLayerUrl,
+    selectionOrder: item.selectionOrder,
+  })),
+  createdAt: journeyResult.createdAt,
+};
+
+export const staffReservation: StaffReservationListItem = {
+  reservationId: reservation.id,
+  reservationCode: reservation.reservationCode,
+  reservedAt: reservation.reservedAt,
+  reservationStatus: "COMPLETED",
+  store,
+  customer: { id: customer.id, name: customer.name, profileType: customer.profileType },
+  journey: { id: "journey-1", status: "FINISHED", currentStage: "RESULT", currentStepNumber: 3 },
+};
+
+export const staffJourney: StaffJourneyView = {
+  journey: journeyAggregate("FINISHED").journey,
+  reservation: journeyAggregate("FINISHED").reservation,
+  customer: { id: customer.id, name: customer.name, profileType: customer.profileType },
+  profileSnapshot: journeyAggregate("FINISHED").profileSnapshot,
+  steps: journeyAggregate("FINISHED").completedSteps,
+  interactions: [
+    { id: "staff-interaction-1", journeyStepId: "step-1", productId: "product-bag-1", type: "SELECTED", sequence: 1, createdAt: "2026-08-04T02:05:00.000Z" },
+    { id: "staff-interaction-2", journeyStepId: "step-2", productId: "product-apparel-1", type: "REJECTED", sequence: 2, createdAt: "2026-08-04T02:15:00.000Z" },
+  ],
+  result: { ...journeyResult, staffSummary: "고객 응대를 위한 저장된 직원 요약입니다." },
+};

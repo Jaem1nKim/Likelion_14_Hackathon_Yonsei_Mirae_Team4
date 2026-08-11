@@ -61,6 +61,31 @@ const reservationViewSelectForJourney = {
   },
 } satisfies Prisma.ReservationSelect;
 
+export const journeyResultSelect = {
+  id: true,
+  journeyId: true,
+  signatureName: true,
+  signatureStory: true,
+  finalLookSummary: true,
+  personaBaseKey: true,
+  sceneKey: true,
+  shareToken: true,
+  usedFallback: true,
+  createdAt: true,
+  updatedAt: true,
+  items: {
+    orderBy: [{ selectionOrder: "asc" }],
+    select: {
+      id: true,
+      category: true,
+      selectionOrder: true,
+      recommendationReason: true,
+      personaLayerUrl: true,
+      product: { select: journeyProductSelect },
+    },
+  },
+} satisfies Prisma.JourneyResultSelect;
+
 export const journeyAggregateSelect = {
   id: true,
   userId: true,
@@ -128,32 +153,7 @@ export const journeyAggregateSelect = {
       createdAt: true,
     },
   },
-  result: {
-    select: {
-      id: true,
-      journeyId: true,
-      signatureName: true,
-      signatureStory: true,
-      finalLookSummary: true,
-      personaBaseKey: true,
-      sceneKey: true,
-      shareToken: true,
-      usedFallback: true,
-      createdAt: true,
-      updatedAt: true,
-      items: {
-        orderBy: [{ selectionOrder: "asc" }],
-        select: {
-          id: true,
-          category: true,
-          selectionOrder: true,
-          recommendationReason: true,
-          personaLayerUrl: true,
-          product: { select: journeyProductSelect },
-        },
-      },
-    },
-  },
+  result: { select: journeyResultSelect },
 } satisfies Prisma.JourneySelect;
 
 export function findJourneyByReservationInTransaction(

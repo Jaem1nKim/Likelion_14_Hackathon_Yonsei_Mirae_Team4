@@ -7,7 +7,7 @@ import { DEMO_USER_STORAGE_KEY } from "../api/api-client";
 import { DemoUserProvider } from "../context/DemoUserContext";
 import { AppRouter } from "../router/app-router";
 import { ReservationDraftProvider } from "../state/reservation-draft";
-import { customer, success } from "./fixtures";
+import { customer, staff, success } from "./fixtures";
 
 export function mockFetchQueue(...responses: Array<Response | Error | Promise<Response>>) {
   const queue = [...responses];
@@ -29,6 +29,10 @@ export function mockFetchQueue(...responses: Array<Response | Error | Promise<Re
 
 export function authenticate() {
   localStorage.setItem(DEMO_USER_STORAGE_KEY, customer.id);
+}
+
+export function authenticateStaff() {
+  localStorage.setItem(DEMO_USER_STORAGE_KEY, staff.id);
 }
 
 export function authenticatedResponses(
