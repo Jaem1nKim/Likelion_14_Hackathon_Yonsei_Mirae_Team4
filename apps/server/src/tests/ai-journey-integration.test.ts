@@ -17,6 +17,7 @@ import type {
 } from "../services/ai/ai-types.js";
 
 const USER_ID = "10000000-0000-4000-8000-000000000001";
+const STAFF_ID = "10000000-0000-4000-8000-000000000003";
 const STORE_ID = "20000000-0000-4000-8000-000000000001";
 const PREFIX = "71000000-";
 const config: AiConfig = {
@@ -247,7 +248,7 @@ describe("AI-enabled Journey integration", () => {
     expect(finished.result?.usedFallback).toBe(resultFallback);
   });
 
-  it("does not call AI again when a stored Journey is recovered with GET", async () => {
+  it("does not call AI again from Journey, Result, Share or Staff GET APIs", async () => {
     const client = new JourneyFakeClient("success");
     setAiRuntimeForTests({ config, client });
     const finished = await completeJourney();
@@ -257,6 +258,19 @@ describe("AI-enabled Journey integration", () => {
       .set(DEMO_USER_HEADER_NAME, USER_ID)
       .expect(200);
     expect(dataAs<JourneyAggregate>(response.body).result?.signatureName).toBe("MCM Connected Journey");
+    await api
+      .get(`/api/journeys/${finished.journey.id}/result`)
+      .set(DEMO_USER_HEADER_NAME, USER_ID)
+      .expect(200);
+    await api.get(`/api/share/${finished.result!.shareToken}`).expect(200);
+    await api
+      .get("/api/staff/reservations")
+      .set(DEMO_USER_HEADER_NAME, STAFF_ID)
+      .expect(200);
+    await api
+      .get(`/api/staff/journeys/${finished.journey.id}`)
+      .set(DEMO_USER_HEADER_NAME, STAFF_ID)
+      .expect(200);
     expect(client.requests).toHaveLength(before);
   });
 

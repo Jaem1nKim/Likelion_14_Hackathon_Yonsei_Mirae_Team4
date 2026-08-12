@@ -58,7 +58,7 @@ export function JourneyIntroPage() {
           {isStarting && (
             <div className="journey-operation" role="status" aria-live="polite">
               <span className="loading-mark" aria-hidden="true" />
-              <span>당신의 첫 Journey를 준비하고 있어요.</span>
+              <span>취향을 분석해 첫 Journey를 구성하고 있어요.</span>
             </div>
           )}
           <div className="page-actions">

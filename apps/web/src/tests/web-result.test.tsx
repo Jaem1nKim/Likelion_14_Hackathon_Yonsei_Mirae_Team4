@@ -24,6 +24,20 @@ describe("customer Journey result", () => {
     expect(screen.getByText(journeyResult.finalLookSummary)).toBeInTheDocument();
   });
 
+  it("shows the AI Signature marker for a stored AI Result", async () => {
+    authenticate();
+    mockFetchQueue(success(customer), success({ ...journeyResult, usedFallback: false }));
+    renderApp("/journey/journey-1/result");
+    expect(await screen.findByText("✦ AI가 완성한 Journey Signature")).toBeInTheDocument();
+  });
+
+  it("does not show an AI Signature marker for a fallback Result", async () => {
+    renderResult();
+    renderApp("/journey/journey-1/result");
+    await screen.findByRole("heading", { name: journeyResult.signatureName });
+    expect(screen.queryByText("✦ AI가 완성한 Journey Signature")).not.toBeInTheDocument();
+  });
+
   it("shows only stored items in selection order", async () => {
     renderResult();
     renderApp("/journey/journey-1/result");

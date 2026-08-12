@@ -56,7 +56,6 @@ export const journeyStepJsonSchema: Record<string, unknown> = {
       type: "array",
       minItems: 1,
       maxItems: 3,
-      uniqueItems: true,
       items: { type: "string", minLength: 1 },
     },
     challengeProductId: { anyOf: [{ type: "string", minLength: 1 }, { type: "null" }] },

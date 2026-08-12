@@ -622,7 +622,11 @@
 
 .product-card-copy > strong { min-height: 2.8em; font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
 .product-meta { color: var(--muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
-.recommendation-reason { color: #48453f; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.recommendation-reason { display: grid; gap: 6px; color: #48453f; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.recommendation-reason-label { color: #6d5428; font-size: 11px; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+.ai-personalization { display: flex; align-items: center; gap: 18px; margin: 8px 0 22px; padding: 14px 16px; border-left: 3px solid var(--accent); background: #f1eee7; color: #443b2c; }
+.ai-personalization strong { flex: 0 0 auto; font-size: 13px; }
+.ai-personalization span { color: #5e594f; font-size: 14px; line-height: 1.5; }
 
 .recommendation-badge {
   width: fit-content;
@@ -696,6 +700,8 @@
   line-height: 1.08;
   overflow-wrap: anywhere;
 }
+
+.ai-signature-badge { display: inline-flex; margin: 0 0 18px; padding: 8px 11px; border: 1px solid #b6985f; color: #5d4720; background: #f3efe6; font-size: 12px; font-weight: 800; }
 
 .result-story {
   max-width: 760px;
@@ -808,6 +814,7 @@
 .staff-final-products { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
 .staff-final-products span { padding: 7px 9px; border: 1px solid var(--line); background: #fff; }
 .staff-result blockquote { margin: 20px 0 0; padding: 20px; border-left: 4px solid var(--accent); color: #3f3c37; line-height: 1.75; background: #ecece7; }
+.staff-ai-status { display: inline-flex; margin-bottom: 12px; padding: 6px 9px; border: 1px solid #b6985f; color: #5d4720; background: #f3efe6; font-size: 11px; font-weight: 800; }
 .empty-state { padding: 24px; color: var(--muted); text-align: center; border: 1px solid var(--line); background: #fff; }
 
 @media (max-width: 760px) {
@@ -837,6 +844,7 @@
 }
 
 @media (max-width: 600px) {
+  .ai-personalization { align-items: flex-start; flex-direction: column; gap: 5px; }
   .profile-summary,
   .score-grid,
   .input-grid,

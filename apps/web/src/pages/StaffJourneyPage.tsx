@@ -73,7 +73,7 @@ export function StaffJourneyPage() {
         {decisionInteractions.length === 0 ? <p className="empty-state">아직 선택 기록이 없습니다.</p> : <ol className="staff-interactions">{decisionInteractions.map((interaction) => <li key={interaction.id}><span>{interaction.sequence}</span><strong>{interaction.type}</strong><p>{productNames.get(interaction.productId) ?? "제품"}</p></li>)}</ol>}
       </section>
 
-      {view.result && <section className="staff-result" aria-labelledby="staff-result-title"><p className="eyebrow">SERVICE SUMMARY</p><h2 id="staff-result-title">{view.result.signatureName}</h2><p>{view.result.finalLookSummary}</p><div className="staff-final-products">{view.result.items.map((item) => <span key={item.id}>{item.selectionOrder}. {item.product.name}</span>)}</div><blockquote>{view.result.staffSummary}</blockquote></section>}
+      {view.result && <section className="staff-result" aria-labelledby="staff-result-title"><p className="eyebrow">SERVICE SUMMARY</p>{!view.result.usedFallback && <span className="staff-ai-status">AI Personalization 적용</span>}<h2 id="staff-result-title">{view.result.signatureName}</h2><p>{view.result.finalLookSummary}</p><div className="staff-final-products">{view.result.items.map((item) => <span key={item.id}>{item.selectionOrder}. {item.product.name}</span>)}</div><blockquote>{view.result.staffSummary}</blockquote></section>}
       <div className="page-actions"><Link className="button button-secondary" to="/staff/reservations">예약 목록으로</Link></div>
     </AppLayout>
   );

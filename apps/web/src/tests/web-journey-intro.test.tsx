@@ -53,7 +53,7 @@ describe("Journey intro and start", () => {
     mockFetchQueue(success(customer), success(journeyAggregate("READY")), new Promise<Response>(() => undefined));
     renderApp("/journey/journey-1/intro");
     await userEvent.click(await screen.findByRole("button", { name: "Journey 시작하기" }));
-    expect(screen.getByText("당신의 첫 Journey를 준비하고 있어요.")).toBeInTheDocument();
+    expect(screen.getByText("취향을 분석해 첫 Journey를 구성하고 있어요.")).toBeInTheDocument();
   });
 
   it("redirects an already active Journey to selection", async () => {

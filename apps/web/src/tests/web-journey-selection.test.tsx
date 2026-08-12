@@ -23,6 +23,39 @@ describe("Journey product selection", () => {
     }
   });
 
+  it("shows AI personalization and AI reason labels only for a stored AI Step", async () => {
+    const aggregate = journeyAggregate("BAG");
+    aggregate.currentStep!.usedFallback = false;
+    for (const recommendation of aggregate.currentStep!.recommendations) {
+      recommendation.isAiSelected = true;
+    }
+    mockFetchQueue(...authenticatedResponses(success(aggregate)));
+    renderApp("/journey/journey-1/select");
+    expect(await screen.findByText("✦ AI 맞춤 추천")).toBeInTheDocument();
+    expect(screen.getAllByText("AI 추천 이유")).toHaveLength(3);
+  });
+
+  it("does not claim AI personalization for a fallback Step", async () => {
+    mockFetchQueue(...authenticatedResponses(success(journeyAggregate("BAG"))));
+    renderApp("/journey/journey-1/select");
+    await screen.findByText("BAG 시나리오");
+    expect(screen.queryByText("✦ AI 맞춤 추천")).not.toBeInTheDocument();
+    expect(screen.queryByText("AI 추천 이유")).not.toBeInTheDocument();
+    expect(screen.getAllByText("추천 이유")).toHaveLength(3);
+  });
+
+  it("restores the AI personalization marker from the aggregate after refresh", async () => {
+    const aggregate = journeyAggregate("APPAREL");
+    aggregate.currentStep!.usedFallback = false;
+    aggregate.currentStep!.recommendations.forEach((item) => {
+      item.isAiSelected = true;
+    });
+    mockFetchQueue(...authenticatedResponses(success(aggregate)));
+    renderApp("/journey/journey-1/select");
+    expect(await screen.findByText("✦ AI 맞춤 추천")).toBeInTheDocument();
+    expect(screen.getByText(/방금 선택한 가방과 취향/)).toBeInTheDocument();
+  });
+
   it("uses customer-friendly recommendation labels", async () => {
     mockFetchQueue(...authenticatedResponses(success(journeyAggregate("BAG"))));
     renderApp("/journey/journey-1/select");

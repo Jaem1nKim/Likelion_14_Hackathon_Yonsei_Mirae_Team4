@@ -60,6 +60,9 @@ export function JourneyResultPage() {
     <AppLayout>
       <section className="result-hero" aria-labelledby="signature-title">
         <p className="eyebrow">YOUR JOURNEY SIGNATURE</p>
+        {!result.usedFallback && (
+          <p className="ai-signature-badge">✦ AI가 완성한 Journey Signature</p>
+        )}
         <h1 id="signature-title">{result.signatureName}</h1>
         <p className="result-story">{result.signatureStory}</p>
       </section>

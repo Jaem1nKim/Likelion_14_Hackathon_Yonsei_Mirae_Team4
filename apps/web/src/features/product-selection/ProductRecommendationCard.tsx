@@ -12,6 +12,7 @@ type Props = {
   rejected: boolean;
   pending: boolean;
   disabled: boolean;
+  aiPersonalized: boolean;
   onInteraction: (type: InteractionType) => void;
 };
 
@@ -21,6 +22,7 @@ export function ProductRecommendationCard({
   rejected,
   pending,
   disabled,
+  aiPersonalized,
   onInteraction,
 }: Props) {
   const { product } = recommendation;
@@ -55,7 +57,12 @@ export function ProductRecommendationCard({
             {product.material ? ` · ${product.material}` : ""}
             {product.size ? ` · ${product.size}` : ""}
           </span>
-          <span className="recommendation-reason">{recommendation.reason}</span>
+          <span className="recommendation-reason">
+            <span className="recommendation-reason-label">
+              {aiPersonalized ? "AI 추천 이유" : "추천 이유"}
+            </span>
+            {recommendation.reason}
+          </span>
           {selected && <span className="selected-label">선택됨</span>}
           {rejected && !selected && <span className="rejected-label">제외 기록됨</span>}
         </span>

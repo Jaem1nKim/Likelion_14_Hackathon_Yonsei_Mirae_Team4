@@ -19,6 +19,7 @@
     "test": "npm run test:server && npm run test:web",
     "test:server": "npm run build:shared && cross-env NODE_ENV=test DATABASE_URL=file:./prisma/test.db RUST_LOG=info prisma migrate deploy && cross-env NODE_ENV=test DATABASE_URL=file:./prisma/test.db prisma db seed && cross-env NODE_ENV=test DATABASE_URL=file:./prisma/test.db npm run test -w @mcm/server",
     "test:web": "npm run build:shared && npm run test -w @mcm/web",
+    "ai:smoke": "tsx apps/server/src/scripts/ai-smoke.ts",
     "db:generate": "prisma generate",
     "db:migrate": "cross-env RUST_LOG=info prisma migrate dev",
     "db:seed": "prisma db seed",

@@ -42,7 +42,7 @@ describe("Journey transitions and recovery", () => {
     await userEvent.click(button);
     fireEvent.click(button);
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(screen.getByText("지금까지의 선택을 연결하고 있어요.")).toBeInTheDocument();
+    expect(screen.getByText("지금까지의 선택을 반영해 다음 스타일을 찾고 있어요.")).toBeInTheDocument();
   });
 
   it("recovers once after a stale next response", async () => {
@@ -81,7 +81,7 @@ describe("Journey transitions and recovery", () => {
     await userEvent.click(button);
     fireEvent.click(button);
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(screen.getByText("Journey Signature를 완성하고 있어요.")).toBeInTheDocument();
+    expect(screen.getByText("선택의 흐름을 분석해 Journey Signature를 완성하고 있어요.")).toBeInTheDocument();
   });
 
   it("shows the FINISHED completion state", async () => {

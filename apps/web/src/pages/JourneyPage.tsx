@@ -151,10 +151,25 @@ export function JourneyPage({ view }: Props) {
   }
 
   const activeStage = step.stage as keyof typeof STAGE_LABEL;
+  const aiPersonalized =
+    !step.usedFallback &&
+    step.recommendations.length > 0 &&
+    step.recommendations.every((recommendation) => recommendation.isAiSelected);
+  const aiPersonalizationCopy = {
+    BAG: "취향 프로필과 오늘의 방향을 바탕으로 첫 Journey를 구성했어요.",
+    APPAREL: "방금 선택한 가방과 취향을 연결해 다음 스타일을 구성했어요.",
+    ACCESSORY: "지금까지의 선택을 분석해 마지막 디테일을 추천했어요.",
+  }[activeStage];
 
   return (
     <AppLayout>
       <JourneyStageProgress aggregate={currentAggregate} />
+      {aiPersonalized && (
+        <aside className="ai-personalization" aria-label="AI 맞춤 추천">
+          <strong>✦ AI 맞춤 추천</strong>
+          <span>{aiPersonalizationCopy}</span>
+        </aside>
+      )}
       <PageHeader
         eyebrow={`STEP ${step.stepNumber} · ${STAGE_LABEL[activeStage]}`}
         title={step.scenarioTitle}
@@ -242,6 +257,7 @@ export function JourneyPage({ view }: Props) {
                   rejected={rejectedIds.has(recommendation.product.id)}
                   pending={pendingProductId === recommendation.product.id}
                   disabled={pendingProductId !== null || operation !== null}
+                  aiPersonalized={aiPersonalized}
                   onInteraction={(type) => void handleInteraction(recommendation.product.id, type)}
                 />
               ))}
@@ -252,7 +268,7 @@ export function JourneyPage({ view }: Props) {
           {operation && (
             <div className="journey-operation" role="status" aria-live="polite">
               <span className="loading-mark" aria-hidden="true" />
-              <span>{operation === "next" ? "지금까지의 선택을 연결하고 있어요." : "Journey Signature를 완성하고 있어요."}</span>
+              <span>{operation === "next" ? "지금까지의 선택을 반영해 다음 스타일을 찾고 있어요." : "선택의 흐름을 분석해 Journey Signature를 완성하고 있어요."}</span>
             </div>
           )}
           <div className="page-actions page-actions-split journey-actions">

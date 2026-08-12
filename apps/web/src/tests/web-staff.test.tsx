@@ -127,6 +127,16 @@ describe("staff Journey detail", () => {
     expect(await screen.findByText(staffJourney.result!.staffSummary)).toBeInTheDocument();
   });
 
+  it("shows the AI personalization status only for an AI Result", async () => {
+    authenticateStaff();
+    mockFetchQueue(success(staff), success({
+      ...staffJourney,
+      result: { ...staffJourney.result!, usedFallback: false },
+    }));
+    renderApp("/staff/journeys/journey-1");
+    expect(await screen.findByText("AI Personalization 적용")).toBeInTheDocument();
+  });
+
   it("restores staff detail from the URL", async () => {
     const fetchMock = renderJourney();
     renderApp("/staff/journeys/journey-1");
