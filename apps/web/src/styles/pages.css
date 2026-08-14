@@ -766,6 +766,356 @@
   border-bottom: 1px solid var(--line);
 }
 
+.ar-result-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: 42px;
+  padding: 28px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.ar-result-action h2 {
+  margin-bottom: 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+}
+
+.ar-result-action p:last-child {
+  max-width: 680px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.ar-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 0 20px;
+}
+
+.ar-header h1 {
+  margin-bottom: 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 40px;
+  font-weight: 500;
+}
+
+.ar-header p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ar-product-list {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ar-product-list li {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.ar-product-list strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.ar-product-list span {
+  overflow-wrap: anywhere;
+}
+
+.ar-camera-shell {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid #302e2a;
+  background: #171715;
+}
+
+.ar-video,
+.ar-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ar-video {
+  transform: scaleX(-1);
+}
+
+.ar-overlay {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ar-camera-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  color: #d8d2c7;
+  text-align: center;
+}
+
+.ar-detection-status {
+  position: absolute;
+  z-index: 3;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  padding: 11px 13px;
+  color: #f7f4ed;
+  font-size: 13px;
+  line-height: 1.5;
+  background: rgb(20 19 17 / 82%);
+}
+
+.ar-status-tracking {
+  border-left: 3px solid #78b690;
+}
+
+.ar-status-permission-denied,
+.ar-status-camera-unavailable,
+.ar-status-mediapipe-error {
+  border-left: 3px solid #d68b80;
+}
+
+.ar-asset-warning {
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 16px;
+  border-left: 4px solid #ad7d4a;
+  color: #4e4031;
+  background: #f1ece3;
+}
+
+.ar-asset-warning span {
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.ar-asset-loading,
+.ar-privacy-note {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ar-comparison {
+  margin-top: 24px;
+  padding: 24px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.ar-comparison-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.ar-comparison-header h2 {
+  margin: 4px 0 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 500;
+}
+
+.ar-comparison-header p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ar-comparison-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ar-comparison-tabs button {
+  min-height: 46px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ar-comparison-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+}
+
+.ar-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.ar-comparison-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  min-height: 116px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink);
+  text-align: left;
+  background: #fff;
+  cursor: pointer;
+}
+
+.ar-comparison-card.is-active {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.ar-comparison-media {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  background: #ecece7;
+}
+
+.ar-comparison-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ar-comparison-copy {
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.ar-comparison-copy > span:not(.ar-comparison-badges) {
+  font-weight: 750;
+}
+
+.ar-comparison-copy small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.ar-comparison-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 21px;
+}
+
+.ar-comparison-badges strong,
+.ar-comparison-badges em {
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.ar-comparison-badges strong {
+  color: #5d4720;
+  background: #eee5d4;
+}
+
+.ar-comparison-badges em {
+  color: #fff;
+  background: var(--ink);
+}
+
+.ar-capture-error {
+  margin: 14px 0 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.ar-capture-backdrop {
+  position: fixed;
+  z-index: 50;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgb(17 16 14 / 82%);
+}
+
+.ar-capture-preview {
+  display: grid;
+  gap: 18px;
+  width: min(680px, 100%);
+  max-height: calc(100vh - 48px);
+  padding: 24px;
+  overflow-y: auto;
+  border-radius: 6px;
+  background: #f8f7f3;
+  box-shadow: 0 20px 70px rgb(0 0 0 / 35%);
+}
+
+.ar-capture-copy h2 {
+  margin: 4px 0 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.ar-capture-copy p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ar-capture-preview > img {
+  display: block;
+  width: 100%;
+  max-height: min(62vh, 720px);
+  object-fit: contain;
+  border: 1px solid #302e2a;
+  background: #171715;
+}
+
+.ar-capture-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .share-panel h2 { margin-bottom: 8px; font-family: Georgia, serif; font-size: 25px; }
 .share-panel p { color: var(--muted); }
 .share-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; }
@@ -900,6 +1250,18 @@
   .zone-focus, .progress-detail, .decision-panel, .journey-complete, .checkin-form { padding: 22px; }
   .result-hero h1 { font-size: 38px; }
   .result-summary, .share-panel, .share-controls { grid-template-columns: 1fr; }
+  .ar-result-action, .ar-header { align-items: stretch; flex-direction: column; }
+  .ar-result-action .button, .ar-header .button { width: 100%; }
+  .ar-header h1 { font-size: 34px; }
+  .ar-camera-shell { min-height: 0; aspect-ratio: 3 / 4; }
+  .ar-controls { display: grid; grid-template-columns: 1fr; }
+  .ar-comparison-header { align-items: stretch; flex-direction: column; }
+  .ar-comparison-header .button { width: 100%; }
+  .ar-comparison-grid { grid-template-columns: 1fr; }
+  .ar-capture-backdrop { padding: 12px; }
+  .ar-capture-preview { max-height: calc(100vh - 24px); padding: 16px; }
+  .ar-capture-actions { display: grid; grid-template-columns: 1fr; }
+  .ar-capture-actions .button { width: 100%; }
   .staff-filter, .staff-reservation-card, .staff-overview, .staff-score-grid { grid-template-columns: 1fr; }
   .staff-interactions li { grid-template-columns: 30px 90px minmax(0, 1fr); }
 }

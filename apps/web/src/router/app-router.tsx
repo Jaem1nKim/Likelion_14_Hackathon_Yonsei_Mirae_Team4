@@ -20,6 +20,7 @@ import { ProfilePage } from "../pages/ProfilePage";
 import { QuestionPage } from "../pages/QuestionPage";
 import { ReservePage } from "../pages/ReservePage";
 import { JourneyIntroPage } from "../pages/JourneyIntroPage";
+import { JourneyArPage } from "../pages/JourneyArPage";
 import { JourneyPage } from "../pages/JourneyPage";
 import { JourneyResultPage } from "../pages/JourneyResultPage";
 import { SharedResultPage } from "../pages/SharedResultPage";
@@ -135,6 +136,7 @@ export function AppRouter() {
         <Route path="/journey/:journeyId/progress" element={<JourneyPage view="progress" />} />
         <Route path="/journey/:journeyId/decision" element={<JourneyPage view="decision" />} />
         <Route path="/journey/:journeyId/result" element={<JourneyResultPage />} />
+        <Route path="/journey/:journeyId/ar" element={<JourneyArPage />} />
       </Route>
       <Route element={<RequireStaff />}>
         <Route path="/staff/reservations" element={<StaffReservationsPage />} />

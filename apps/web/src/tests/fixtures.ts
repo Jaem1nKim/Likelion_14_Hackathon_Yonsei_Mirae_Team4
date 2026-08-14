@@ -3,7 +3,6 @@ import type {
   CustomerJourneyResultView,
   DemoUser,
   JourneyAggregate,
-  JourneyStage,
   ReservationView,
   SharedJourneyResultView,
   StaffJourneyView,
@@ -123,11 +122,15 @@ export function apiFailure(
 }
 
 const products = [
-  { id: "product-bag-1", sku: "DEMO-BAG-01", name: "Demo Visetos Carry Bag", category: "BAG" as const, color: "BLACK" },
-  { id: "product-bag-2", sku: "DEMO-BAG-02", name: "Demo Structured Tote", category: "BAG" as const, color: "BROWN" },
-  { id: "product-bag-3", sku: "DEMO-BAG-03", name: "Demo Mini Crossbody", category: "BAG" as const, color: "WHITE" },
-  { id: "product-apparel-1", sku: "DEMO-APP-01", name: "Demo Urban Jacket", category: "APPAREL" as const, color: "BLACK" },
-  { id: "product-accessory-1", sku: "DEMO-ACC-01", name: "Demo Heritage Scarf", category: "ACCESSORY" as const, color: "GOLD" },
+  { id: "product-bag-1", sku: "DEMO-BAG-001", name: "Demo Visetos Carry Bag", category: "BAG" as const, color: "BLACK" },
+  { id: "product-bag-2", sku: "DEMO-BAG-002", name: "Demo Structured Tote", category: "BAG" as const, color: "BROWN" },
+  { id: "product-bag-3", sku: "DEMO-BAG-003", name: "Demo Mini Crossbody", category: "BAG" as const, color: "WHITE" },
+  { id: "product-apparel-1", sku: "DEMO-APP-001", name: "Monogram Backpack Vest", category: "APPAREL" as const, color: "BLACK" },
+  { id: "product-apparel-2", sku: "DEMO-APP-002", name: "Blouson Leather Jacket", category: "APPAREL" as const, color: "BLACK" },
+  { id: "product-apparel-3", sku: "DEMO-APP-003", name: "Essential Logo Patch Varsity Jacket", category: "APPAREL" as const, color: "WHITE" },
+  { id: "product-accessory-1", sku: "DEMO-ACC-001", name: "Adjustable M-Art Reversible Belt 1.5” in Lauretos Grey", category: "ACCESSORY" as const, color: "BLACK_BROWN" },
+  { id: "product-accessory-2", sku: "DEMO-ACC-002", name: "MCM Silk Visetos Scarf - Brown", category: "ACCESSORY" as const, color: "BROWN" },
+  { id: "product-accessory-3", sku: "DEMO-ACC-003", name: "Aren Rabbit 2D Charm in Visetos Pink", category: "ACCESSORY" as const, color: "PINK" },
 ].map((item) => ({
   ...item,
   material: "Demo leather",
@@ -135,21 +138,21 @@ const products = [
   size: "M",
   capacity: null,
   wearMethod: null,
-  description: `${item.name} description`,
+  description: item.sku === "DEMO-ACC-001"
+    ? "An adjustable 1.5-inch reversible belt in Lauretos Grey, finished with the M-Art buckle."
+    : `${item.name} description`,
   imageUrl: `/images/${item.id}.jpg`,
   personaLayerUrl: null,
   sceneBackgroundKey: "demo-scene",
   tags: [{ type: "STYLE" as const, name: "CLASSIC", score: 90, verified: true }],
 }));
 
-function stageProduct(stage: JourneyStage) {
-  if (stage === "APPAREL") return products[3]!;
-  if (stage === "ACCESSORY") return products[4]!;
-  return products[0]!;
-}
-
 function step(stage: "BAG" | "APPAREL" | "ACCESSORY", stepNumber: number, selected = false) {
-  const available = stage === "BAG" ? products.slice(0, 3) : [stageProduct(stage)];
+  const available = stage === "BAG"
+    ? products.slice(0, 3)
+    : stage === "APPAREL"
+      ? products.slice(3, 6)
+      : products.slice(6, 9);
   return {
     id: `step-${stepNumber}`,
     journeyId: "journey-1",

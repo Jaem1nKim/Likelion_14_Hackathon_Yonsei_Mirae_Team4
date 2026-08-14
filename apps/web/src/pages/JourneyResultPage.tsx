@@ -89,6 +89,17 @@ export function JourneyResultPage() {
         }))} />
       </section>
 
+      <section className="ar-result-action" aria-labelledby="ar-result-title">
+        <div>
+          <p className="eyebrow">AR FITTING</p>
+          <h2 id="ar-result-title">선택한 BAG, APPAREL, ACCESSORY를 함께 착용해보세요</h2>
+          <p>카메라에서 자세를 인식해 최종 선택 아이템의 위치와 크기를 실시간으로 맞춥니다.</p>
+        </div>
+        <Link className="button button-primary" to={`/journey/${encodeURIComponent(journeyId ?? "")}/ar`}>
+          AR로 착용해보기
+        </Link>
+      </section>
+
       <section className="share-panel" aria-labelledby="share-title">
         <div>
           <p className="eyebrow">SHARE</p>

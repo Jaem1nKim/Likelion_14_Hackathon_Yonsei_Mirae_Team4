@@ -117,7 +117,7 @@ describe("Journey transitions and recovery", () => {
     mockFetchQueue(...authenticatedResponses(success(journeyAggregate("ACCESSORY"))));
     renderApp("/journey/journey-1/progress");
     expect(await screen.findByText("Demo Visetos Carry Bag")).toBeInTheDocument();
-    expect(screen.getByText("Demo Urban Jacket")).toBeInTheDocument();
+    expect(screen.getByText("Monogram Backpack Vest")).toBeInTheDocument();
   });
 
   it("keeps FINISHED users out of selection", async () => {
