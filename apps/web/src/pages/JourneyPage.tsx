@@ -21,6 +21,7 @@ import {
 } from "../features/journey/journey-navigation";
 import { useJourneyAggregate } from "../features/journey/use-journey-aggregate";
 import { ProductRecommendationCard } from "../features/product-selection/ProductRecommendationCard";
+import { createUuidV4 } from "../utils/uuid";
 
 const STAGE_LABEL = { BAG: "BAG", APPAREL: "APPAREL", ACCESSORY: "ACCESSORY" } as const;
 
@@ -98,7 +99,7 @@ export function JourneyPage({ view }: Props) {
     setActionError(null);
     try {
       const updated = await createJourneyInteraction(journeyId, {
-        interactionId: crypto.randomUUID(),
+        interactionId: createUuidV4(),
         journeyStepId: currentStep.id,
         productId,
         type,

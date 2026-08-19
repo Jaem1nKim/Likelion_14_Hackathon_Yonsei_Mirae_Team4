@@ -1,7 +1,7 @@
 import { HEALTH_API_PATH, type HealthResponse } from "@mcm/shared";
 
 const apiBaseUrl = (
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api"
+  import.meta.env.VITE_API_BASE_URL ?? "/api"
 ).replace(/\/$/, "");
 
 export async function fetchHealth(signal?: AbortSignal): Promise<HealthResponse> {

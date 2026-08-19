@@ -8,7 +8,7 @@ export const DEMO_USER_STORAGE_KEY = "mcm-demo-user-id";
 export const AUTH_INVALID_EVENT = "mcm:demo-auth-invalid";
 
 const apiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:3000/api";
+  import.meta.env.VITE_API_BASE_URL?.trim() || "/api";
 
 type ApiRequestOptions = {
   method?: "GET" | "POST" | "PUT";
