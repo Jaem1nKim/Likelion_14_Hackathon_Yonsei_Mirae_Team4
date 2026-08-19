@@ -4,8 +4,10 @@ import { disconnectPrisma } from "./lib/prisma.js";
 
 const app = createApp();
 
-const server = app.listen(env.SERVER_PORT, () => {
-  console.log(`MCM Journey Passport server listening on port ${env.SERVER_PORT}`);
+const server = app.listen(env.SERVER_PORT, env.SERVER_HOST, () => {
+  console.log(
+    `MCM Journey Passport server listening on ${env.SERVER_HOST}:${env.SERVER_PORT}`,
+  );
 });
 
 let isShuttingDown = false;

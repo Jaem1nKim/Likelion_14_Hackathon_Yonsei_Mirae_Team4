@@ -1,0 +1,24 @@
+[Unit]
+Description=MCM Journey Passport Express backend
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/mcm-journey-passport/current
+EnvironmentFile=/etc/mcm-journey-passport.env
+ExecStart=/usr/bin/node apps/server/dist/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/mcm-journey-passport
+
+[Install]
+WantedBy=multi-user.target

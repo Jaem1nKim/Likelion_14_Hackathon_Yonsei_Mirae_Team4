@@ -88,6 +88,30 @@ describe("Journey product selection", () => {
     expect(body).toMatchObject({ interactionId: "123e4567-e89b-42d3-a456-426614174000", type: "SELECTED", journeyStepId: "step-1", productId: "product-bag-1" });
   });
 
+  it("uses the secure UUID fallback when randomUUID is unavailable", async () => {
+    const selected = journeyAggregate("BAG", true);
+    const fetchMock = mockFetchQueue(
+      ...authenticatedResponses(success(journeyAggregate("BAG")), success(selected)),
+    );
+    vi.stubGlobal("crypto", {
+      getRandomValues: (target: Uint8Array) => {
+        target.fill(0xab);
+        return target;
+      },
+    });
+
+    try {
+      renderApp("/journey/journey-1/select");
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Demo Visetos Carry Bag 선택" }),
+      );
+      const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+      expect(body.interactionId).toBe("abababab-abab-4bab-abab-abababababab");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("marks selection only after the server aggregate succeeds", async () => {
     let resolveInteraction: ((value: Response) => void) | undefined;
     const pending = new Promise<Response>((resolve) => { resolveInteraction = resolve; });
