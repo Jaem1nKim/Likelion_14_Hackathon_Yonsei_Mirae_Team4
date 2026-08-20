@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -148,5 +148,9 @@ describe("Journey transitions and recovery", () => {
     renderApp("/journey/journey-1/route");
     expect(await screen.findByRole("heading", { name: "BAG ZONE" })).toBeInTheDocument();
     expect(screen.getByText("BAG 전시 구역으로 이동해 주세요.")).toBeInTheDocument();
+    const navigation = screen.getByRole("navigation", { name: "현재 Journey 보기" });
+    expect(within(navigation).getByRole("button", { name: /구역 안내/ })).toHaveAttribute("aria-current", "page");
+    expect(within(navigation).getAllByRole("button")).toHaveLength(3);
+    expect(within(navigation).queryByRole("button", { name: /완성하기/ })).not.toBeInTheDocument();
   });
 });

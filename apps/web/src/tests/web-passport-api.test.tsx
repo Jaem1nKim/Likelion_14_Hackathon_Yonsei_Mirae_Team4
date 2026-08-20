@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DEMO_USER_STORAGE_KEY } from "../api/api-client";
 import {
@@ -15,6 +15,22 @@ import {
   mockFetchQueue,
   renderApp,
 } from "./test-utils";
+
+vi.mock("qrcode.react", () => ({
+  QRCodeSVG: ({
+    value,
+    title,
+  }: {
+    value: string | string[];
+    title?: string;
+  }) => (
+    <svg
+      aria-label={title}
+      data-qr-value={Array.isArray(value) ? value.join("") : value}
+      role="img"
+    />
+  ),
+}));
 
 describe("Journey Passport", () => {
   it("loads Reservation details from the URL id", async () => {
@@ -39,6 +55,17 @@ describe("Journey Passport", () => {
     expect(screen.getByText(reservation.startAnswerLabel)).toBeInTheDocument();
     expect(screen.getByText(reservation.qrToken)).toBeInTheDocument();
     expect(screen.getByText("QR 준비 완료")).toBeInTheDocument();
+  });
+
+  it("encodes the reservation qr token in the QR SVG", async () => {
+    authenticate();
+    mockFetchQueue(...authenticatedResponses(success(reservation)));
+    renderApp(`/passport/${reservation.id}`);
+
+    expect(await screen.findByRole("img", { name: "입장용 QR 코드" })).toHaveAttribute(
+      "data-qr-value",
+      reservation.qrToken,
+    );
   });
 
   it("shows the RESERVED guidance", async () => {

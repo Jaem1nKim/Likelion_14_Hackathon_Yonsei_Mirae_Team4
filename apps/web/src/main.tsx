@@ -20,6 +20,9 @@ import "./styles/journey-result.css";
 import "./styles/shared-result.css";
 import "./styles/ar-experience.css";
 import "./styles/login-experience.css";
+import "./styles/journey-intro-experience.css";
+import "./styles/profile-experience.css";
+import "./styles/journey-support.css";
 
 const rootElement = document.getElementById("root");
 

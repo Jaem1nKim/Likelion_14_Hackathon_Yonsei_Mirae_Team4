@@ -8,6 +8,7 @@ import {
   consentAllowed,
   consentMissing,
   customer,
+  profile,
   secondCustomer,
   staff,
   store,
@@ -42,7 +43,13 @@ describe("customer login", () => {
 
   it("logs in and routes an already-consented customer to profile", async () => {
     const user = userEvent.setup();
-    mockFetchQueue(success([customer]), success(customer), success(consentAllowed));
+    mockFetchQueue(
+      success([customer]),
+      success(customer),
+      success(consentAllowed),
+      success(profile),
+      success(consentAllowed),
+    );
     renderApp("/login");
     await user.click(await screen.findByRole("button", { name: /Stable Explorer/ }));
     await user.click(screen.getByRole("button", { name: "이 프로필로 시작하기" }));

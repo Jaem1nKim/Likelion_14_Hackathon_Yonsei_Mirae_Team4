@@ -1,4 +1,5 @@
 import type { ReservationStatus, ReservationView } from "@mcm/shared";
+import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -152,8 +153,28 @@ export function PassportPage() {
                   <span className="qr-ready">QR 준비 완료</span>
                 </div>
                 <div className="passport-qr-token" aria-label="입장용 QR 토큰">
-                  <span>QR TOKEN</span>
-                  <code>{reservation.qrToken}</code>
+                  {reservation.qrToken ? (
+                    <>
+                      <QRCodeSVG
+                        className="passport-qr-token__svg"
+                        value={reservation.qrToken}
+                        size={240}
+                        level="M"
+                        marginSize={4}
+                        bgColor="#ffffff"
+                        fgColor="#000000"
+                        title="입장용 QR 코드"
+                      />
+                      <div className="passport-qr-token__value">
+                        <span>QR TOKEN</span>
+                        <code>{reservation.qrToken}</code>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="passport-qr-token__unavailable" role="status">
+                      QR 코드를 사용할 수 없습니다.
+                    </p>
+                  )}
                 </div>
                 <p>이 토큰으로 매장 입장 및 Journey를 불러옵니다.</p>
                 <output className="reservation-code" aria-label="수동 체크인 코드">

@@ -55,7 +55,12 @@ describe("consent page", () => {
     const user = userEvent.setup();
     authenticate();
     const fetchMock = mockFetchQueue(
-      ...authenticatedResponses(success(consentMissing), success(consentAllowed), success(profile)),
+      ...authenticatedResponses(
+        success(consentMissing),
+        success(consentAllowed),
+        success(profile),
+        success(consentAllowed),
+      ),
     );
     renderApp("/consent");
     await user.click(
@@ -75,7 +80,12 @@ describe("consent page", () => {
     const user = userEvent.setup();
     authenticate();
     const fetchMock = mockFetchQueue(
-      ...authenticatedResponses(success(consentMissing), success(consentAllowed), success(profile)),
+      ...authenticatedResponses(
+        success(consentMissing),
+        success(consentAllowed),
+        success(profile),
+        success(consentAllowed),
+      ),
     );
     renderApp("/consent");
     await user.click(
@@ -94,7 +104,12 @@ describe("consent page", () => {
     const user = userEvent.setup();
     authenticate();
     mockFetchQueue(
-      ...authenticatedResponses(success(consentAllowed), success(consentAllowed), success(profile)),
+      ...authenticatedResponses(
+        success(consentAllowed),
+        success(consentAllowed),
+        success(profile),
+        success(consentAllowed),
+      ),
     );
     renderApp("/consent");
     await user.click(
@@ -131,7 +146,7 @@ describe("consent page", () => {
 describe("profile page", () => {
   it("displays TasteProfile summary and profile type", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     expect(await screen.findByText(profile.tasteProfile.summary)).toBeInTheDocument();
     expect(screen.getByText("Classic Urban")).toBeInTheDocument();
@@ -139,7 +154,7 @@ describe("profile page", () => {
 
   it("displays all four score values", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     await screen.findByText(profile.tasteProfile.summary);
     for (const score of [88, 56, 32, 91]) {
@@ -150,7 +165,7 @@ describe("profile page", () => {
 
   it("groups preferences by their type", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     expect(await screen.findByText("카테고리")).toBeInTheDocument();
     expect(screen.getByText("컬러")).toBeInTheDocument();
@@ -164,6 +179,7 @@ describe("profile page", () => {
     mockFetchQueue(
       ...authenticatedResponses(
         apiFailure(404, "RESOURCE_NOT_FOUND", "TasteProfile을 찾을 수 없습니다."),
+        success(consentAllowed),
       ),
     );
     renderApp("/profile");
@@ -176,7 +192,8 @@ describe("profile page", () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(success(customer))
-      .mockImplementationOnce(() => new Promise<Response>(() => undefined));
+      .mockImplementationOnce(() => new Promise<Response>(() => undefined))
+      .mockResolvedValueOnce(success(consentAllowed));
     vi.stubGlobal("fetch", fetchMock);
     renderApp("/profile");
     expect(await screen.findByText("취향 프로필을 불러오고 있습니다.")).toBeInTheDocument();
@@ -185,10 +202,20 @@ describe("profile page", () => {
   it("logs out from the profile page", async () => {
     const user = userEvent.setup();
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     await user.click(await screen.findByRole("button", { name: "로그아웃" }));
     expect(await screen.findByRole("heading", { name: /Where will your choicetake you/ })).toBeInTheDocument();
     await waitFor(() => expect(localStorage.length).toBe(0));
+  });
+
+  it("displays the current required and optional consent settings", async () => {
+    authenticate();
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
+    renderApp("/profile");
+    expect(await screen.findByText("Journey 진행 및 제품 선택 데이터 이용")).toBeInTheDocument();
+    expect(screen.getByText("온라인 관심·행동 정보 활용")).toBeInTheDocument();
+    expect(screen.getAllByText("동의함")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "동의 설정 변경" })).toBeInTheDocument();
   });
 });

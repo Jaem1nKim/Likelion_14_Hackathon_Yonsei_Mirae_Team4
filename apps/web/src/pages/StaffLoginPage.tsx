@@ -4,11 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { errorMessage } from "../api/api-client";
 import { getStaffDemoUsers } from "../api/demo-api";
-import { AppLayout } from "../components/AppLayout";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
-import { PageHeader } from "../components/PageHeader";
-import { PrimaryButton } from "../components/PrimaryButton";
+import { StaffHeader } from "../components/StaffHeader";
 import { useDemoUser } from "../hooks/useDemoUser";
 
 export function StaffLoginPage() {
@@ -50,29 +48,84 @@ export function StaffLoginPage() {
   }
 
   return (
-    <AppLayout showUser={false}>
-      <PageHeader eyebrow="STAFF ACCESS" title="MCM Journey Staff" description="시연용 직원 프로필로 예약과 Journey 상태를 확인합니다." />
-      {isLoading && <LoadingState message="직원 프로필을 불러오고 있습니다." />}
-      {!isLoading && error && <ErrorState message={error} onRetry={() => setAttempt((value) => value + 1)} />}
-      {!isLoading && !error && users.length === 0 && <ErrorState message="사용 가능한 직원 프로필이 없습니다." onRetry={() => setAttempt((value) => value + 1)} />}
-      {!isLoading && !error && users.length > 0 && (
-        <>
-          <div className="choice-grid user-grid" role="list">
-            {users.map((candidate) => {
-              const selected = selectedId === candidate.id;
-              return (
-                <button key={candidate.id} type="button" className={`choice-card user-card${selected ? " is-selected" : ""}`} aria-pressed={selected} onClick={() => setSelectedId(candidate.id)}>
-                  <span className="avatar" aria-hidden="true"><span>{candidate.name.trim().charAt(0) || "M"}</span></span>
-                  <span className="choice-content"><strong>{candidate.name}</strong><span>{candidate.profileType ?? "Journey Staff"}</span></span>
-                  <span className="selection-label">{selected ? "선택됨" : "선택"}</span>
-                </button>
-              );
-            })}
+    <div className="staffx-page staffx-login">
+      <StaffHeader isLogin />
+      <main className="staffx-login__main">
+        <section className="staffx-login__visual" aria-labelledby="staff-login-visual-title">
+          <img src="/assets/login/store-hero.png" alt="MCM 매장 내부" />
+          <div className="staffx-login__visual-copy">
+            <p>STORE EXPERIENCE · MCM</p>
+            <h2 id="staff-login-visual-title">THE JOURNEY<br />BEGINS ON<br />THE FLOOR.</h2>
+            <span>예약 고객의 취향과 Journey를 연결하는 매장 경험</span>
           </div>
-          <div className="page-actions"><PrimaryButton type="button" disabled={!selectedId} isLoading={isSubmitting} onClick={() => void handleLogin()}>직원 화면 시작하기</PrimaryButton></div>
-        </>
-      )}
-      <p className="login-switch"><Link to="/login">고객 로그인으로 돌아가기</Link></p>
-    </AppLayout>
+          <div className="staffx-login__visual-index" aria-hidden="true">
+            <span>01</span><span>RESERVATION DESK</span>
+            <span>02</span><span>CUSTOMER BRIEFING</span>
+          </div>
+        </section>
+
+        <section className="staffx-login__access" aria-labelledby="staff-login-title">
+          <div className="staffx-login__access-inner">
+            <div className="staffx-login__heading">
+              <p>STAFF ACCESS</p>
+              <h1 id="staff-login-title">MCM Journey Staff</h1>
+              <span>오늘 매장 Journey를 운영할 직원 프로필을 선택하세요.</span>
+            </div>
+
+            <div className="staffx-login__content">
+              {isLoading && <LoadingState message="직원 프로필을 불러오고 있습니다." />}
+              {!isLoading && error && <ErrorState message={error} onRetry={() => setAttempt((value) => value + 1)} />}
+              {!isLoading && !error && users.length === 0 && (
+                <ErrorState message="사용 가능한 직원 프로필이 없습니다." onRetry={() => setAttempt((value) => value + 1)} />
+              )}
+              {!isLoading && !error && users.length > 0 && (
+                <>
+                  <div className="staffx-profile-list" role="list" aria-label="직원 프로필">
+                    {users.map((candidate, index) => {
+                      const selected = selectedId === candidate.id;
+                      return (
+                        <button
+                          key={candidate.id}
+                          type="button"
+                          className={`staffx-profile${selected ? " is-selected" : ""}`}
+                          aria-pressed={selected}
+                          onClick={() => setSelectedId(candidate.id)}
+                        >
+                          <span className="staffx-profile__order" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                          <span className="staffx-profile__avatar" aria-hidden="true">
+                            <span>{candidate.name.trim().charAt(0) || "M"}</span>
+                            {candidate.avatarUrl && <img src={candidate.avatarUrl} alt="" onError={(event) => { event.currentTarget.hidden = true; }} />}
+                          </span>
+                          <span className="staffx-profile__copy">
+                            <strong>{candidate.name}</strong>
+                            <span>{candidate.profileType ?? "Journey Staff"}</span>
+                          </span>
+                          <span className="staffx-profile__selection">{selected ? "선택됨" : "선택"}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    className="staffx-primary-action"
+                    type="button"
+                    disabled={!selectedId || isSubmitting}
+                    aria-busy={isSubmitting}
+                    onClick={() => void handleLogin()}
+                  >
+                    {isSubmitting ? "매장 화면 준비 중..." : "직원 화면 시작하기"}
+                    {!isSubmitting && <span aria-hidden="true">→</span>}
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className="staffx-login__footer">
+              <p>고객 Journey를 시작하시나요?</p>
+              <Link to="/login">고객 로그인으로 돌아가기 <span aria-hidden="true">↗</span></Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
