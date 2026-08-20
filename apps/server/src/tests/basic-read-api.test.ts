@@ -326,14 +326,21 @@ describe("products", () => {
     const categoryIndex = new Map(
       PRODUCT_CATEGORY_VALUES.map((category, index) => [category, index]),
     );
-    const sortKeys = products.map(
-      (product) =>
-        `${categoryIndex.get(product.category)}:${product.name}:${product.id}`,
-    );
+    const expectedOrder = [...products].sort((left, right) => {
+      const categoryDifference =
+        (categoryIndex.get(left.category) ?? Number.MAX_SAFE_INTEGER) -
+        (categoryIndex.get(right.category) ?? Number.MAX_SAFE_INTEGER);
 
-    expect(products).toHaveLength(9);
+      return (
+        categoryDifference ||
+        left.name.localeCompare(right.name, "en") ||
+        left.id.localeCompare(right.id, "en")
+      );
+    });
+
+    expect(products).toHaveLength(41);
     expect(products.every((product) => product.inventory.quantity > 0)).toBe(true);
-    expect(sortKeys).toEqual([...sortKeys].sort());
+    expect(products.map(({ id }) => id)).toEqual(expectedOrder.map(({ id }) => id));
   });
 
   it("filters products by category", async () => {
@@ -343,7 +350,7 @@ describe("products", () => {
       .set(DEMO_USER_HEADER_NAME, STABLE_USER_ID)
       .expect(200);
 
-    expect(response.body.data).toHaveLength(3);
+    expect(response.body.data).toHaveLength(17);
     expect(
       (response.body.data as StoreProductView[]).every(
         (product) => product.category === "BAG",
@@ -358,7 +365,7 @@ describe("products", () => {
       .set(DEMO_USER_HEADER_NAME, STABLE_USER_ID)
       .expect(200);
 
-    expect(response.body.data).toHaveLength(3);
+    expect(response.body.data).toHaveLength(17);
     expect(
       (response.body.data as StoreProductView[]).every(
         (product) => product.inventory.zoneId === BAG_ZONE_ID,
@@ -468,7 +475,7 @@ describe("products", () => {
         .expect(200);
       const products = response.body.data as StoreProductView[];
 
-      expect(products).toHaveLength(6);
+      expect(products).toHaveLength(24);
       expect(products.every((product) => product.inventory.zoneId !== BAG_ZONE_ID)).toBe(
         true,
       );

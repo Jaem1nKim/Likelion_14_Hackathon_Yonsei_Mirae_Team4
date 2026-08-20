@@ -1,4 +1,8 @@
 export const POSE_LANDMARK_INDEX = {
+  leftEyeOuter: 3,
+  rightEyeOuter: 6,
+  leftEar: 7,
+  rightEar: 8,
   leftShoulder: 11,
   rightShoulder: 12,
   leftHip: 23,
@@ -91,7 +95,9 @@ export const DEFAULT_BAG_SMOOTHING: BagSmoothingOptions = {
   rapidMovementAlpha: 0.68,
 };
 
-function isVisible(landmark: PoseLandmark | undefined): landmark is PoseLandmark {
+export function isPoseLandmarkVisible(
+  landmark: PoseLandmark | undefined,
+): landmark is PoseLandmark {
   if (!landmark) return false;
   return (landmark.visibility ?? 1) >= POSE_VISIBILITY_THRESHOLD
     && (landmark.presence ?? 1) >= POSE_VISIBILITY_THRESHOLD;
@@ -145,7 +151,7 @@ export function calculateCanvasLayout(viewport: VideoViewport): CanvasLayout | n
   };
 }
 
-function projectLandmark(landmark: PoseLandmark, layout: CanvasLayout) {
+export function projectPoseLandmark(landmark: PoseLandmark, layout: CanvasLayout) {
   return {
     x: landmark.x * layout.renderedVideoWidth + layout.videoOffsetX,
     y: landmark.y * layout.renderedVideoHeight + layout.videoOffsetY,
@@ -165,18 +171,18 @@ export function calculateTorsoPoseGeometry(
   const rightHipLandmark = landmarks[POSE_LANDMARK_INDEX.rightHip];
 
   if (
-    !isVisible(leftShoulderLandmark)
-    || !isVisible(rightShoulderLandmark)
-    || !isVisible(leftHipLandmark)
-    || !isVisible(rightHipLandmark)
+    !isPoseLandmarkVisible(leftShoulderLandmark)
+    || !isPoseLandmarkVisible(rightShoulderLandmark)
+    || !isPoseLandmarkVisible(leftHipLandmark)
+    || !isPoseLandmarkVisible(rightHipLandmark)
   ) {
     return null;
   }
 
-  const leftShoulder = projectLandmark(leftShoulderLandmark, layout);
-  const rightShoulder = projectLandmark(rightShoulderLandmark, layout);
-  const leftHip = projectLandmark(leftHipLandmark, layout);
-  const rightHip = projectLandmark(rightHipLandmark, layout);
+  const leftShoulder = projectPoseLandmark(leftShoulderLandmark, layout);
+  const rightShoulder = projectPoseLandmark(rightShoulderLandmark, layout);
+  const leftHip = projectPoseLandmark(leftHipLandmark, layout);
+  const rightHip = projectPoseLandmark(rightHipLandmark, layout);
   const shoulderCenter = {
     x: (leftShoulder.x + rightShoulder.x) / 2,
     y: (leftShoulder.y + rightShoulder.y) / 2,

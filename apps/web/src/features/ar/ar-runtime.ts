@@ -1,4 +1,8 @@
 import type { PoseLandmark } from "./bag-pose";
+import {
+  isCollectionProductAssetPath,
+  prepareCollectionProductOverlay,
+} from "./ar-product-overlay-image";
 
 export type PoseDetectionResult = {
   landmarks: PoseLandmark[][];
@@ -67,7 +71,7 @@ async function createPoseDetector(): Promise<PoseDetector> {
   });
 }
 
-function loadImage(path: string) {
+function loadRawImage(path: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
     image.decoding = "async";
@@ -75,6 +79,17 @@ function loadImage(path: string) {
     image.addEventListener("error", () => reject(new Error("AR_ASSET_NOT_FOUND")), { once: true });
     image.src = path;
   });
+}
+
+async function loadImage(path: string) {
+  const image = await loadRawImage(path);
+  if (!isCollectionProductAssetPath(path)) return image;
+
+  try {
+    return await prepareCollectionProductOverlay(image);
+  } catch {
+    return image;
+  }
 }
 
 export const browserArRuntime: ArRuntime = {

@@ -1,8 +1,10 @@
 import type { ProductCategory } from "@mcm/shared";
-import { useState } from "react";
+
+import { ProductImage } from "../features/product-selection/ProductImage";
 
 export type ResultProductItem = {
   productId: string;
+  sku?: string;
   name: string;
   category: ProductCategory;
   color: string;
@@ -12,21 +14,20 @@ export type ResultProductItem = {
 };
 
 function ResultProductCard({ item }: { item: ResultProductItem }) {
-  const [imageFailed, setImageFailed] = useState(false);
-
   return (
     <article className="result-product-card">
-      <div className={`result-product-media${imageFailed ? " image-unavailable" : ""}`}>
-        <span className="image-fallback" aria-hidden="true">MCM</span>
-        {!imageFailed && (
-          <img
-            src={item.imageUrl}
-            alt={`${item.name} 제품`}
-            onError={() => setImageFailed(true)}
-          />
-        )}
+      <ProductImage
+        product={{
+          id: item.productId,
+          sku: item.sku ?? "",
+          category: item.category,
+          imageUrl: item.imageUrl,
+        }}
+        className="result-product-media"
+        alt={`${item.name} 제품`}
+      >
         <span className="selection-order">{item.selectionOrder}</span>
-      </div>
+      </ProductImage>
       <div className="result-product-copy">
         <p>{item.category} · {item.color}</p>
         <h3>{item.name}</h3>

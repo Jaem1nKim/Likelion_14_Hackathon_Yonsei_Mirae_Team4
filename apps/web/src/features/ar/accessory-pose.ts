@@ -1,8 +1,12 @@
 import {
+  calculateCanvasLayout,
   calculateTorsoPoseGeometry,
   createBagTrackingState,
   finalizeOverlayTransform,
   normalizeShoulderRotation,
+  isPoseLandmarkVisible,
+  POSE_LANDMARK_INDEX,
+  projectPoseLandmark,
   updateBagTracking,
   type BagOverlayTransform,
   type BagSmoothingOptions,
@@ -12,7 +16,7 @@ import {
   type VideoViewport,
 } from "./bag-pose";
 
-export type AccessoryAnchor = "NECK" | "WAIST" | "TORSO_SIDE" | "BAG_ATTACHED";
+export type AccessoryAnchor = "NECK" | "WAIST" | "TORSO_SIDE" | "BAG_ATTACHED" | "GLASSES";
 
 export type AccessoryOverlayConfig = {
   anchor: AccessoryAnchor;
@@ -44,7 +48,7 @@ export const BAG_ATTACHED_ACCESSORY_CALIBRATION = {
   rotationFollowRatio: 0.12,
 } as const;
 
-const ANCHOR_CALIBRATION: Record<Exclude<AccessoryAnchor, "BAG_ATTACHED">, {
+const ANCHOR_CALIBRATION: Record<Exclude<AccessoryAnchor, "BAG_ATTACHED" | "GLASSES">, {
   torsoRatio: number;
   shoulderAxisRatio: number;
   widthFromShoulders: number;
@@ -78,6 +82,62 @@ function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
 }
 
+function calculateGlassesOverlay(
+  landmarks: readonly PoseLandmark[] | undefined,
+  viewport: VideoViewport,
+  config: AccessoryOverlayConfig,
+  mirrored: boolean,
+): AccessoryOverlayTransform | null {
+  const layout = calculateCanvasLayout(viewport);
+  if (!landmarks || !layout || config.aspectRatio <= 0 || config.scaleMultiplier <= 0) {
+    return null;
+  }
+
+  const leftEyeLandmark = landmarks[POSE_LANDMARK_INDEX.leftEyeOuter];
+  const rightEyeLandmark = landmarks[POSE_LANDMARK_INDEX.rightEyeOuter];
+  if (!isPoseLandmarkVisible(leftEyeLandmark) || !isPoseLandmarkVisible(rightEyeLandmark)) {
+    return null;
+  }
+
+  const leftEye = projectPoseLandmark(leftEyeLandmark, layout);
+  const rightEye = projectPoseLandmark(rightEyeLandmark, layout);
+  const eyeVector = {
+    x: rightEye.x - leftEye.x,
+    y: rightEye.y - leftEye.y,
+  };
+  const eyeWidth = Math.hypot(eyeVector.x, eyeVector.y);
+  if (eyeWidth < viewport.displayWidth * 0.025) return null;
+
+  const leftEarLandmark = landmarks[POSE_LANDMARK_INDEX.leftEar];
+  const rightEarLandmark = landmarks[POSE_LANDMARK_INDEX.rightEar];
+  let faceWidth = eyeWidth * 2.15;
+  if (isPoseLandmarkVisible(leftEarLandmark) && isPoseLandmarkVisible(rightEarLandmark)) {
+    const leftEar = projectPoseLandmark(leftEarLandmark, layout);
+    const rightEar = projectPoseLandmark(rightEarLandmark, layout);
+    faceWidth = Math.hypot(rightEar.x - leftEar.x, rightEar.y - leftEar.y);
+  }
+  const width = clamp(
+    faceWidth * 0.94 * config.scaleMultiplier,
+    viewport.displayWidth * 0.13,
+    viewport.displayWidth * 0.48,
+  );
+  const eyeCenter = {
+    x: (leftEye.x + rightEye.x) / 2,
+    y: (leftEye.y + rightEye.y) / 2,
+  };
+  const rotationRadians = normalizeShoulderRotation(
+    Math.atan2(eyeVector.y, eyeVector.x),
+  ) + config.rotationOffset;
+
+  return finalizeOverlayTransform({
+    centerX: eyeCenter.x + width * config.offsetX,
+    centerY: eyeCenter.y + width * config.offsetY,
+    width,
+    height: width / config.aspectRatio,
+    rotationRadians,
+  }, viewport, layout, mirrored);
+}
+
 export function calculateAccessoryOverlay(
   landmarks: readonly PoseLandmark[] | undefined,
   viewport: VideoViewport,
@@ -85,6 +145,9 @@ export function calculateAccessoryOverlay(
   mirrored = true,
 ): AccessoryOverlayTransform | null {
   if (config.anchor === "BAG_ATTACHED") return null;
+  if (config.anchor === "GLASSES") {
+    return calculateGlassesOverlay(landmarks, viewport, config, mirrored);
+  }
   const geometry = calculateTorsoPoseGeometry(landmarks, viewport);
   if (!geometry || config.aspectRatio <= 0 || config.scaleMultiplier <= 0) return null;
 

@@ -9,6 +9,10 @@ import {
   UserRole,
 } from "../generated/prisma/enums.js";
 import { disconnectPrisma, prisma } from "../lib/prisma.js";
+import {
+  JOURNEY_STAGE_SEQUENCE,
+  isSupportedJourneyStage,
+} from "../constants/journey.js";
 
 const failures: string[] = [];
 let assertionCount = 0;
@@ -177,6 +181,46 @@ async function verifySeedData() {
   for (const tag of productTags) {
     check(inScoreRange(tag.score), `ProductTag ${tag.id} score is out of range`);
   }
+
+  const importedProducts = await prisma.product.findMany({
+    where: { sku: { startsWith: "MCM-" } },
+    select: { sku: true, name: true, category: true, imageUrl: true },
+  });
+  const expectedImportedCounts = new Map<ProductCategory, number>([
+    [ProductCategory.BAG, 14],
+    [ProductCategory.APPAREL, 9],
+    [ProductCategory.ACCESSORY, 4],
+    [ProductCategory.SHOES, 5],
+  ]);
+
+  check(importedProducts.length === 32, "MCM import must contain exactly 32 products");
+  for (const [category, expectedCount] of expectedImportedCounts) {
+    check(
+      importedProducts.filter((product) => product.category === category).length ===
+        expectedCount,
+      `MCM import ${category} count must be ${expectedCount}`,
+    );
+  }
+  for (const product of importedProducts) {
+    check(
+      product.name === product.name.normalize("NFC"),
+      `Product ${product.sku} name must use NFC normalization`,
+    );
+    check(
+      product.imageUrl.startsWith("/assets/products/mcm-collection/") &&
+        product.imageUrl.endsWith(".webp"),
+      `Product ${product.sku} must reference an imported WebP asset`,
+    );
+  }
+
+  check(
+    JOURNEY_STAGE_SEQUENCE.join(",") === "BAG,APPAREL,ACCESSORY",
+    "Journey stage sequence must remain BAG, APPAREL, ACCESSORY",
+  );
+  check(
+    !isSupportedJourneyStage(JourneyStage.SHOES),
+    "SHOES must remain outside the Journey stage sequence",
+  );
 }
 
 type SqliteIndexRow = { name: string; unique: number | bigint };

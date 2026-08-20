@@ -204,11 +204,14 @@
 }
 
 .journey-select-experience .product-media img {
+  box-sizing: border-box;
   position: relative;
   z-index: 1;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  padding: clamp(14px, 1.8vw, 24px);
+  object-fit: contain;
+  object-position: center;
 }
 
 .journey-select-experience .image-fallback {

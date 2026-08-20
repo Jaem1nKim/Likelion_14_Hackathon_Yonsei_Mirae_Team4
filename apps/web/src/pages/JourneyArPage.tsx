@@ -8,6 +8,7 @@ import { getJourneyResult } from "../api/result-api";
 import { AppLayout } from "../components/AppLayout";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
+import { ProductImage } from "../features/product-selection/ProductImage";
 import { getAccessoryArAsset } from "../features/ar/accessory-ar-assets";
 import {
   calculateAccessoryOverlay,
@@ -27,6 +28,7 @@ import {
 } from "../features/ar/apparel-pose";
 import { drawArOverlayLayers } from "../features/ar/ar-overlay-renderer";
 import { captureArFrame } from "../features/ar/ar-frame-capture";
+import { imageAspectRatio } from "../features/ar/ar-product-overlay-image";
 import { getBagArAsset } from "../features/ar/bag-ar-assets";
 import {
   AR_COMPARISON_CATEGORIES,
@@ -384,13 +386,22 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
       const detection = detector.detectForVideo(video, nowMs);
       const landmarks = detection.landmarks[0];
       const bagTransform = bagAsset
-        ? calculateBagOverlay(landmarks, viewport, bagAsset, true)
+        ? calculateBagOverlay(landmarks, viewport, {
+          ...bagAsset,
+          aspectRatio: imageAspectRatio(bagAssetImageRef.current, bagAsset.aspectRatio),
+        }, true)
         : null;
       const apparelTransform = apparelAsset
         ? calculateApparelOverlay(landmarks, viewport, apparelAsset, true)
         : null;
       const poseAccessoryTransform = accessoryAsset
-        ? calculateAccessoryOverlay(landmarks, viewport, accessoryAsset, true)
+        ? calculateAccessoryOverlay(landmarks, viewport, {
+          ...accessoryAsset,
+          aspectRatio: imageAspectRatio(
+            accessoryAssetImageRef.current,
+            accessoryAsset.aspectRatio,
+          ),
+        }, true)
         : null;
       const bagTracking = updateBagTracking(bagTrackingRef.current, bagTransform, nowMs);
       const apparelTracking = updateApparelTracking(
@@ -668,21 +679,25 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
               </div>
               <ul className="ar-product-list" aria-label="현재 착용 제품">
                 <li className={!isBagVisible ? "is-hidden" : ""}>
-                  <span className="ar-current-media"><img src={bagProduct.imageUrl} alt="" /></span>
+                  <ProductImage product={bagProduct} className="ar-current-media" alt="" />
                   <span className="ar-current-copy"><strong>BAG</strong><span>{bagProduct.name}</span></span>
                   <button type="button" disabled={bagAssetState !== "ready"} aria-pressed={isBagVisible} onClick={() => setIsBagVisible((visible) => !visible)}>
                     {isBagVisible ? "가방 숨기기" : "가방 표시하기"}
                   </button>
                 </li>
                 <li className={!isApparelVisible ? "is-hidden" : ""}>
-                  <span className="ar-current-media">{apparelProduct && <img src={apparelProduct.imageUrl} alt="" />}</span>
+                  {apparelProduct
+                    ? <ProductImage product={apparelProduct} className="ar-current-media" alt="" />
+                    : <span className="ar-current-media" />}
                   <span className="ar-current-copy"><strong>APPAREL</strong><span>{apparelProduct?.name ?? "선택된 APPAREL 없음"}</span></span>
                   <button type="button" disabled={apparelAssetState !== "ready"} aria-pressed={isApparelVisible} onClick={() => setIsApparelVisible((visible) => !visible)}>
                     {isApparelVisible ? "APPAREL 숨기기" : "APPAREL 표시하기"}
                   </button>
                 </li>
                 <li className={!isAccessoryVisible ? "is-hidden" : ""}>
-                  <span className="ar-current-media">{accessoryProduct && <img src={accessoryProduct.imageUrl} alt="" />}</span>
+                  {accessoryProduct
+                    ? <ProductImage product={accessoryProduct} className="ar-current-media" alt="" />
+                    : <span className="ar-current-media" />}
                   <span className="ar-current-copy"><strong>ACCESSORY</strong><span>{accessoryProduct?.name ?? "선택된 ACCESSORY 없음"}</span></span>
                   <button type="button" disabled={accessoryAssetState !== "ready"} aria-pressed={isAccessoryVisible} onClick={() => setIsAccessoryVisible((visible) => !visible)}>
                     {isAccessoryVisible ? "ACCESSORY 숨기기" : "ACCESSORY 표시하기"}
@@ -728,7 +743,11 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
                       aria-pressed={isActive}
                       onClick={() => previewProduct(activeCategory, option.product.id)}
                     >
-                      <span className="ar-comparison-media"><img src={option.product.imageUrl} alt="" /></span>
+                      <ProductImage
+                        product={option.product}
+                        className="ar-comparison-media"
+                        alt=""
+                      />
                       <span className="ar-comparison-copy">
                         <span className="ar-comparison-badges">
                           {option.isAiPick && <strong>AI Pick</strong>}

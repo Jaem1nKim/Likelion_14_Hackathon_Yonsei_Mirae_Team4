@@ -433,8 +433,8 @@ describe("Journey finish and aggregate", () => {
     expect(executions.every((item) => item.validated === false)).toBe(true);
     expect(executions.every((item) => item.errorMessage === "AI_DISABLED")).toBe(true);
     expect(executions.map((item) => JSON.parse(item.requestJson))).toEqual([
-      { stage: "BAG", candidateCount: 3, selectedCount: 0, rejectedCount: 0 },
-      { stage: "APPAREL", candidateCount: 3, selectedCount: 1, rejectedCount: 0 },
+      { stage: "BAG", candidateCount: 17, selectedCount: 0, rejectedCount: 0 },
+      { stage: "APPAREL", candidateCount: 12, selectedCount: 1, rejectedCount: 0 },
       { selectedProductCount: 2, decisionEventCount: 2, allowedSceneKeyCount: 1 },
     ]);
   });
@@ -445,7 +445,7 @@ describe("Journey eligibility and transaction boundaries", () => {
     const inventory = await prisma.inventory.findFirstOrThrow({ where: { storeId: STORE_ID, zoneId: BAG_ZONE_ID } });
     await prisma.inventory.update({ where: { id: inventory.id }, data: { quantity: 0 } });
     const aggregate = await start();
-    expect(aggregate.currentStep?.recommendations).toHaveLength(2);
+    expect(aggregate.currentStep?.recommendations).toHaveLength(3);
     expect(aggregate.currentStep?.recommendations.some((item) => item.product.id === inventory.productId)).toBe(false);
   });
 

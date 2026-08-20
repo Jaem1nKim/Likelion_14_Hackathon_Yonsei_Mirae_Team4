@@ -34,6 +34,15 @@ function torsoLandmarks(overrides: Partial<Record<11 | 12 | 23 | 24, PoseLandmar
   return landmarks;
 }
 
+function faceLandmarks() {
+  const landmarks = torsoLandmarks();
+  landmarks[3] = { x: 0.56, y: 0.14, visibility: 1, presence: 1 };
+  landmarks[6] = { x: 0.44, y: 0.14, visibility: 1, presence: 1 };
+  landmarks[7] = { x: 0.62, y: 0.15, visibility: 1, presence: 1 };
+  landmarks[8] = { x: 0.38, y: 0.15, visibility: 1, presence: 1 };
+  return landmarks;
+}
+
 function config(anchor: AccessoryOverlayConfig["anchor"]): AccessoryOverlayConfig {
   return {
     anchor,
@@ -99,6 +108,39 @@ describe("ACCESSORY pose projection", () => {
       23: { x: 0.62, y: 0.75, visibility: 0.2, presence: 1 },
     });
     expect(calculateAccessoryOverlay(pose, viewport, config("WAIST"))).toBeNull();
+  });
+
+  it("anchors collection sunglasses to the visible eye and face landmarks", () => {
+    const glasses = getAccessoryArAsset({
+      id: "MCM-ACC-001",
+      sku: "MCM-ACC-001",
+      category: "ACCESSORY",
+    })!;
+    const overlay = calculateAccessoryOverlay(faceLandmarks(), viewport, glasses, false)!;
+
+    expect(glasses.anchor).toBe("GLASSES");
+    expect(overlay.centerX).toBeCloseTo(500, 4);
+    expect(overlay.centerY).toBeGreaterThan(112);
+    expect(overlay.centerY).toBeLessThan(140);
+    expect(overlay.rotationRadians).toBeCloseTo(0, 6);
+    expect(overlay.width).toBeGreaterThan(180);
+  });
+
+  it("mirrors GLASSES position and tilt exactly once", () => {
+    const pose = faceLandmarks();
+    pose[3] = { x: 0.66, y: 0.12, visibility: 1, presence: 1 };
+    pose[6] = { x: 0.48, y: 0.16, visibility: 1, presence: 1 };
+    const normal = calculateAccessoryOverlay(pose, viewport, config("GLASSES"), false)!;
+    const mirrored = calculateAccessoryOverlay(pose, viewport, config("GLASSES"), true)!;
+
+    expect(mirrored.centerX).toBeCloseTo(viewport.displayWidth - normal.centerX, 6);
+    expect(mirrored.rotationRadians).toBeCloseTo(-normal.rotationRadians, 6);
+  });
+
+  it("hides GLASSES when either eye landmark is unreliable", () => {
+    const pose = faceLandmarks();
+    pose[3] = { x: 0.56, y: 0.14, visibility: 0.2, presence: 1 };
+    expect(calculateAccessoryOverlay(pose, viewport, config("GLASSES"), false)).toBeNull();
   });
 
   it("can calculate BAG, APPAREL, and ACCESSORY transforms from one pose result", async () => {
