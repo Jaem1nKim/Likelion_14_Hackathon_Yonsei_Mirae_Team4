@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   Navigate,
   Outlet,
@@ -7,14 +6,13 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import { getUserConsent } from "../api/consent-api";
 import { AppLayout } from "../components/AppLayout";
-import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
 import { useDemoUser } from "../hooks/useDemoUser";
 import { ConsentPage } from "../pages/ConsentPage";
 import { DevHealthPage } from "../pages/DevHealthPage";
 import { LoginPage } from "../pages/LoginPage";
+import { JourneyIntroductionPage } from "../pages/JourneyIntroductionPage";
 import { PassportPage } from "../pages/PassportPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { QuestionPage } from "../pages/QuestionPage";
@@ -28,6 +26,7 @@ import { StaffJourneyPage } from "../pages/StaffJourneyPage";
 import { StaffLoginPage } from "../pages/StaffLoginPage";
 import { StaffReservationsPage } from "../pages/StaffReservationsPage";
 import { StoreCheckInPage } from "../pages/StoreCheckInPage";
+import { ServiceIntroductionPage } from "../pages/ServiceIntroductionPage";
 
 function RequireCustomer() {
   const { user, isInitializing } = useDemoUser();
@@ -61,64 +60,11 @@ function RequireStaff() {
   return <Outlet />;
 }
 
-function HomeRoute() {
-  const { user, isInitializing } = useDemoUser();
-  const [destination, setDestination] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    if (user.role === "STAFF") {
-      setDestination("/staff/reservations");
-      return;
-    }
-
-    const controller = new AbortController();
-    setError(null);
-    void getUserConsent(user.id, controller.signal)
-      .then(({ currentConsent }) => {
-        setDestination(
-          currentConsent?.journeyDataAllowed ? "/profile" : "/consent",
-        );
-      })
-      .catch((caught: unknown) => {
-        if (!(caught instanceof DOMException && caught.name === "AbortError")) {
-          setError(caught instanceof Error ? caught.message : "동의를 확인하지 못했습니다.");
-        }
-      });
-    return () => controller.abort();
-  }, [attempt, user]);
-
-  if (isInitializing) {
-    return <LoadingState message="Journey를 준비하고 있습니다." />;
-  }
-  if (!user) {
-    return <Navigate replace to="/login" />;
-  }
-  if (destination) {
-    return <Navigate replace to={destination} />;
-  }
-  if (error) {
-    return <ErrorState message={error} onRetry={() => setAttempt((value) => value + 1)} />;
-  }
-  return <LoadingState message="동의 상태를 확인하고 있습니다." />;
-}
-
 export function AppRouter() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <AppLayout>
-            <HomeRoute />
-          </AppLayout>
-        }
-      />
+      <Route path="/" element={<ServiceIntroductionPage />} />
+      <Route path="/journey-introduction" element={<JourneyIntroductionPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/staff/login" element={<StaffLoginPage />} />
       <Route path="/share/:shareToken" element={<SharedResultPage />} />

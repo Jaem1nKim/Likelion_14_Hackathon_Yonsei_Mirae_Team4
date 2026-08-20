@@ -1,0 +1,428 @@
+.checkin-figma-page {
+  min-height: 100vh;
+  color: #171717;
+  background: #111111;
+  font-family: Arial, Pretendard, "Noto Sans KR", sans-serif;
+}
+
+.checkin-figma-page .introduction-header {
+  position: relative;
+  z-index: 10;
+  height: 73px;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  background: #222222;
+}
+
+.checkin-figma-page .introduction-header__nav {
+  gap: 16px;
+}
+
+.checkin-figma-page__body {
+  display: grid;
+  min-height: calc(100vh - 73px);
+  grid-template-columns: minmax(0, 1.08fr) minmax(520px, 0.92fr);
+  overflow: hidden;
+}
+
+.checkin-figma-visual {
+  position: relative;
+  display: flex;
+  min-height: calc(100vh - 73px);
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(62px, 8vh, 96px) clamp(48px, 7vw, 112px) 46px;
+  color: #ffffff;
+  background: #292621 url("/assets/journey-intro/city-transition.png") center 57% / cover no-repeat;
+}
+
+.checkin-figma-visual__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(7, 7, 7, 0.76), rgba(7, 7, 7, 0.26) 68%, rgba(7, 7, 7, 0.5)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.16), transparent 40%, rgba(0, 0, 0, 0.72));
+  pointer-events: none;
+}
+
+.checkin-figma-visual__content,
+.checkin-figma-passage {
+  position: relative;
+  z-index: 1;
+}
+
+.checkin-figma-eyebrow {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.checkin-figma-visual h1 {
+  margin: 20px 0 0;
+  font-size: clamp(50px, 5.2vw, 76px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+}
+
+.checkin-figma-visual__content > p:last-child {
+  margin: 28px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(16px, 1.35vw, 20px);
+  line-height: 1.6;
+  letter-spacing: -0.025em;
+}
+
+.checkin-figma-passage {
+  display: grid;
+  margin: 0;
+  padding: 20px 0 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgba(255, 255, 255, 0.34);
+  list-style: none;
+}
+
+.checkin-figma-passage li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.checkin-figma-passage li span {
+  color: rgba(255, 255, 255, 0.32);
+  font-weight: 400;
+}
+
+.checkin-figma-passage .is-complete,
+.checkin-figma-passage .is-current {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.checkin-figma-passage .is-current::after {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  content: "";
+}
+
+.checkin-figma-panel {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(48px, 7vh, 84px) clamp(40px, 6vw, 92px);
+  background: #f4f1ec;
+}
+
+.checkin-figma-panel__inner {
+  width: min(100%, 560px);
+}
+
+.checkin-figma-heading .checkin-figma-eyebrow {
+  color: #77716a;
+}
+
+.checkin-figma-heading h2 {
+  margin: 17px 0 0;
+  color: #171717;
+  font-size: clamp(38px, 3.35vw, 52px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.055em;
+}
+
+.checkin-figma-page__lead {
+  max-width: 430px;
+  margin: 20px 0 0;
+  color: #5f5a54;
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: -0.015em;
+}
+
+.checkin-figma-form {
+  display: flex;
+  margin-top: clamp(38px, 5vh, 58px);
+  flex-direction: column;
+  gap: 14px;
+}
+
+.checkin-code-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 0 18px;
+  border-top: 1px solid #262626;
+  border-bottom: 1px solid #aaa39b;
+}
+
+.checkin-code-card::before,
+.checkin-code-card::after {
+  position: absolute;
+  bottom: -6px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #f4f1ec;
+  content: "";
+}
+
+.checkin-code-card::before {
+  left: -5px;
+}
+
+.checkin-code-card::after {
+  right: -5px;
+}
+
+.checkin-code-card__heading,
+.checkin-code-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.checkin-code-card h3,
+.checkin-code-card__heading > span,
+.checkin-code-card__meta > span {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.checkin-code-card__heading > span,
+.checkin-code-card__meta > span {
+  color: #817b74;
+}
+
+.checkin-code-card__meta > .is-ready {
+  color: #315b43;
+}
+
+.checkin-code-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.checkin-code-field label {
+  color: #57524c;
+  font-size: 12px;
+}
+
+.checkin-code-field input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 82px;
+  min-width: 0;
+  padding: 10px 18px;
+  border: 1px solid #918b84;
+  border-radius: 0;
+  color: #171717;
+  background: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-size: clamp(30px, 3vw, 43px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.checkin-code-field input::placeholder {
+  color: #aaa49d;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.checkin-code-field input:focus-visible {
+  border-color: #171717;
+  outline: 0;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #171717;
+}
+
+.checkin-code-help {
+  margin: 0;
+  color: #77716a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.checkin-figma-error {
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid #d6aaa2;
+  color: #8d271f;
+  background: rgba(255, 241, 238, 0.8);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.checkin-figma-actions {
+  display: flex;
+  margin-top: 8px;
+  align-items: center;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.checkin-figma-actions .button {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 0;
+  color: #ffffff;
+  background: #191919;
+  font-size: 14px;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.checkin-figma-actions .button:hover:not(:disabled) {
+  background: #343434;
+  transform: translateY(-1px);
+}
+
+.checkin-figma-actions .button:disabled {
+  color: #98938d;
+  background: #dad5ce;
+}
+
+.checkin-figma-button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.checkin-figma-button--secondary {
+  padding: 4px 10px;
+  color: #6d6760;
+  background: transparent;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.checkin-figma-button--secondary:hover:not(:disabled) {
+  color: #171717;
+}
+
+.checkin-figma-button--secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.checkin-figma-panel__note {
+  margin: 30px 0 0;
+  color: #8a847d;
+  font-size: 10px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+@media (max-width: 1040px) {
+  .checkin-figma-page__body {
+    grid-template-columns: minmax(0, 0.8fr) minmax(480px, 1.2fr);
+  }
+
+  .checkin-figma-visual {
+    padding-right: 42px;
+    padding-left: 42px;
+  }
+
+  .checkin-figma-visual h1 {
+    font-size: 48px;
+  }
+
+  .checkin-figma-passage {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+}
+
+@media (max-width: 800px) {
+  .checkin-figma-page__body {
+    display: block;
+  }
+
+  .checkin-figma-visual {
+    min-height: 330px;
+    padding: 44px 32px 28px;
+    background-position: center 56%;
+  }
+
+  .checkin-figma-visual h1 {
+    font-size: 44px;
+  }
+
+  .checkin-figma-visual__content > p:last-child {
+    display: none;
+  }
+
+  .checkin-figma-passage {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .checkin-figma-panel {
+    padding: 52px 32px 64px;
+  }
+}
+
+@media (max-width: 600px) {
+  .checkin-figma-page .introduction-header {
+    height: 64px;
+    padding: 0 20px;
+  }
+
+  .checkin-figma-visual {
+    min-height: 278px;
+    padding: 36px 20px 24px;
+  }
+
+  .checkin-figma-visual h1 {
+    margin-top: 14px;
+    font-size: 38px;
+  }
+
+  .checkin-figma-passage li {
+    gap: 5px;
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+
+  .checkin-figma-panel {
+    padding: 44px 20px 54px;
+  }
+
+  .checkin-figma-heading h2 {
+    font-size: 36px;
+  }
+
+  .checkin-code-field input {
+    height: 72px;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: clamp(25px, 9vw, 34px);
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkin-code-field input,
+  .checkin-figma-actions .button {
+    transition: none;
+  }
+}

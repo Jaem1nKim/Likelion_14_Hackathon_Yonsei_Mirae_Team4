@@ -56,6 +56,92 @@ describe("Journey BAG, APPAREL, and ACCESSORY AR fitting", () => {
     expect(within(panel).getByText("MCM Silk Visetos Scarf - Brown")).toBeInTheDocument();
   });
 
+  it("renders all comparison cards from their registered WebP assets", async () => {
+    const result = structuredClone(journeyResult);
+    const aggregate = structuredClone(journeyAggregate("FINISHED"));
+    result.items.forEach((item) => {
+      item.product.imageUrl = `/assets/demo/products/${item.product.sku.toLowerCase()}.png`;
+    });
+    aggregate.completedSteps.forEach((step) => {
+      step.recommendations.forEach((recommendation) => {
+        recommendation.product.imageUrl =
+          `/assets/demo/products/${recommendation.product.sku.toLowerCase()}.png`;
+      });
+    });
+
+    renderAr(result, aggregate);
+    const panel = await screen.findByRole("tabpanel");
+    const imageSources = () => [...panel.querySelectorAll("img")]
+      .map((image) => image.getAttribute("src"));
+
+    expect(imageSources()).toEqual([
+      "/assets/ar/bag/demo-urban-carry-backpack.webp",
+      "/assets/ar/bag/demo-classic-boston-bag.webp",
+      "/assets/ar/bag/demo-signal-mini-crossbody.webp",
+    ]);
+    expect(panel.querySelector(".image-fallback")).toBeNull();
+
+    await userEvent.click(screen.getByRole("tab", { name: "APPAREL" }));
+    expect(imageSources()).toEqual([
+      "/assets/ar/apparel/demo-monogram-backpack-vest.webp",
+      "/assets/ar/apparel/demo-blouson-leather-jacket.webp",
+      "/assets/ar/apparel/demo-essential-logo-patch-varsity-jacket.webp",
+    ]);
+
+    await userEvent.click(screen.getByRole("tab", { name: "ACCESSORY" }));
+    expect(imageSources()).toEqual([
+      "/assets/ar/accessory/demo-m-art-reversible-belt-grey.webp",
+      "/assets/ar/accessory/demo-silk-visetos-scarf-brown.webp",
+      "/assets/ar/accessory/demo-aren-rabbit-2d-charm-pink.webp",
+    ]);
+  });
+
+  it("loads newly registered BAG, APPAREL, and GLASSES overlays from Result selections", async () => {
+    const result = structuredClone(journeyResult);
+    const aggregate = structuredClone(journeyAggregate("FINISHED"));
+    const replacements = [
+      {
+        id: "41000000-0000-4000-8000-000000000002",
+        sku: "MCM-BAG-002",
+        name: "Aren 노바 모노그램 ECONYL® 백팩",
+        path: "/assets/products/mcm-collection/bag/aren-nova-monogram-econyl-backpack-black.webp",
+      },
+      {
+        id: "42000000-0000-4000-8000-000000000001",
+        sku: "MCM-APP-001",
+        name: "모노그램 데님 자카드 재킷",
+        path: "/assets/products/mcm-collection/apparel/monogram-denim-jacquard-jacket-denim-blue.webp",
+      },
+      {
+        id: "43000000-0000-4000-8000-000000000001",
+        sku: "MCM-ACC-001",
+        name: "라우렐 지오메트릭 선글라스",
+        path: "/assets/products/mcm-collection/accessory/laurel-geometric-sunglasses.webp",
+      },
+    ] as const;
+
+    replacements.forEach((replacement, index) => {
+      const item = result.items[index]!;
+      item.product = { ...item.product, ...replacement, imageUrl: replacement.path };
+      const step = aggregate.completedSteps[index]!;
+      step.selectedProduct = item.product;
+      step.recommendations[0] = {
+        ...step.recommendations[0]!,
+        product: item.product,
+      };
+    });
+
+    const loadImage = vi.mocked(browserArRuntime.loadImage);
+    renderAr(result, aggregate);
+    const currentProducts = await screen.findByRole("list", { name: "현재 착용 제품" });
+
+    replacements.forEach(({ name, path }) => {
+      expect(within(currentProducts).getByText(name)).toBeInTheDocument();
+      expect(loadImage).toHaveBeenCalledWith(path);
+    });
+    expect(screen.queryByRole("tab", { name: "SHOES" })).not.toBeInTheDocument();
+  });
+
   it("switches BAG, APPAREL, and ACCESSORY overlays without changing the Journey", async () => {
     const loadImage = vi.mocked(browserArRuntime.loadImage);
     renderAr();
@@ -302,9 +388,14 @@ describe("Journey BAG, APPAREL, and ACCESSORY AR fitting", () => {
     });
     const getUserMedia = vi.spyOn(browserArRuntime, "getUserMedia").mockReturnValue(pending);
     renderAr();
+    const camera = await screen.findByLabelText("실시간 BAG, APPAREL, ACCESSORY 가상 피팅 화면");
+    expect(screen.getByText("카메라를 시작해 착용 위치를 확인해보세요.")).toBeInTheDocument();
+    expect(camera).not.toHaveClass("is-camera-active");
     const button = await screen.findByRole("button", { name: "카메라 시작" });
     await userEvent.click(button);
     expect(button).not.toBeInTheDocument();
+    expect(screen.queryByText("카메라를 시작해 착용 위치를 확인해보세요.")).not.toBeInTheDocument();
+    expect(camera).toHaveClass("is-camera-active");
     expect(getUserMedia).toHaveBeenCalledTimes(1);
     resolveStream({ getTracks: () => [] } as unknown as MediaStream);
     await waitFor(() => expect(getUserMedia).toHaveBeenCalledTimes(1));

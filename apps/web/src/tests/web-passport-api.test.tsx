@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { DEMO_USER_STORAGE_KEY } from "../api/api-client";
 import {
@@ -16,12 +16,30 @@ import {
   renderApp,
 } from "./test-utils";
 
+vi.mock("qrcode.react", () => ({
+  QRCodeSVG: ({
+    value,
+    title,
+  }: {
+    value: string | string[];
+    title?: string;
+  }) => (
+    <svg
+      aria-label={title}
+      data-qr-value={Array.isArray(value) ? value.join("") : value}
+      role="img"
+    />
+  ),
+}));
+
 describe("Journey Passport", () => {
   it("loads Reservation details from the URL id", async () => {
     authenticate();
     const fetchMock = mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText(reservation.reservationCode)).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent(
+      reservation.reservationCode,
+    );
     expect(String(fetchMock.mock.calls[1]?.[0])).toContain(`/reservations/${reservation.id}`);
   });
 
@@ -29,12 +47,25 @@ describe("Journey Passport", () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText(reservation.reservationCode)).toBeInTheDocument();
-    expect(screen.getAllByText(customer.name)).toHaveLength(2);
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent(
+      reservation.reservationCode,
+    );
+    expect(screen.getByText(customer.name)).toBeInTheDocument();
     expect(screen.getByText(reservation.store.name)).toBeInTheDocument();
     expect(screen.getByText(reservation.startAnswerLabel)).toBeInTheDocument();
     expect(screen.getByText(reservation.qrToken)).toBeInTheDocument();
     expect(screen.getByText("QR 준비 완료")).toBeInTheDocument();
+  });
+
+  it("encodes the reservation qr token in the QR SVG", async () => {
+    authenticate();
+    mockFetchQueue(...authenticatedResponses(success(reservation)));
+    renderApp(`/passport/${reservation.id}`);
+
+    expect(await screen.findByRole("img", { name: "입장용 QR 코드" })).toHaveAttribute(
+      "data-qr-value",
+      reservation.qrToken,
+    );
   });
 
   it("shows the RESERVED guidance", async () => {
@@ -44,6 +75,17 @@ describe("Journey Passport", () => {
     expect(
       await screen.findByText("매장 도착 후 이 Passport를 직원에게 보여주세요."),
     ).toBeInTheDocument();
+  });
+
+  it("passes the reservation code to store check-in", async () => {
+    const user = userEvent.setup();
+    authenticate();
+    mockFetchQueue(...authenticatedResponses(success(reservation)));
+    renderApp(`/passport/${reservation.id}`);
+    await user.click(await screen.findByRole("button", { name: "매장 체크인" }));
+    expect(screen.getByLabelText("예약 코드를 입력해 주세요.")).toHaveValue(
+      reservation.reservationCode,
+    );
   });
 
   it("shows the CHECKED_IN guidance", async () => {
@@ -77,12 +119,12 @@ describe("Journey Passport", () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     const first = renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText("ABCD2345")).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent("ABCD2345");
     first.unmount();
 
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText("ABCD2345")).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent("ABCD2345");
   });
 
   it("clears login after a forbidden Passport response", async () => {
@@ -109,7 +151,7 @@ describe("Journey Passport", () => {
     authenticate();
     const fetchMock = mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    await screen.findByText("ABCD2345");
+    await screen.findByLabelText("수동 체크인 코드");
     const headers = fetchMock.mock.calls[1]?.[1]?.headers as Headers;
     expect(headers.get("X-Demo-User-Id")).toBe(customer.id);
     expect(Array.from(headers.keys()).some((name) => name.toLowerCase().includes("openai"))).toBe(false);
@@ -117,13 +159,13 @@ describe("Journey Passport", () => {
 
   it("offers profile, new reservation and logout commands", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(reservation), success([customer])));
+    mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
     expect(await screen.findByRole("button", { name: "프로필로 돌아가기" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "새 예약 만들기" })).toBeInTheDocument();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "로그아웃" }));
-    expect(await screen.findByText("오늘의 프로필을 선택하세요")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Where will your choicetake you/ })).toBeInTheDocument();
   });
 
   it("renders the same semantic structure at a mobile viewport", async () => {
@@ -131,7 +173,9 @@ describe("Journey Passport", () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText(reservation.reservationCode)).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent(
+      reservation.reservationCode,
+    );
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByRole("article")).toHaveClass("passport");
     expect(document.querySelector("output.reservation-code")).toHaveTextContent("ABCD2345");

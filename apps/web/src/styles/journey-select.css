@@ -1,0 +1,485 @@
+.journey-select-page {
+  min-height: 100vh;
+  padding: 12px;
+  background: #ffffff;
+  color: #ffffff;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+.journey-select-experience {
+  position: relative;
+  min-height: max(1000px, calc(100vh - 24px));
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-image: url("/assets/journey-select/city-background.png");
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.journey-select-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 45, 45, 0.56);
+  pointer-events: none;
+}
+
+.journey-select-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(1200px, calc(100% - 48px));
+  min-height: max(1000px, calc(100vh - 24px));
+  margin: 0 auto;
+  padding: 60px 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 36px;
+}
+
+.journey-select-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.journey-select-step {
+  margin: 0 0 30px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.journey-select-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.journey-select-heading {
+  display: flex;
+  max-width: 588px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.journey-select-heading p,
+.journey-select-heading h1 {
+  margin: 0;
+}
+
+.journey-select-heading > p:first-child {
+  font-size: 14px;
+}
+
+.journey-select-heading h1 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.journey-select-heading > p:last-child {
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.journey-select-zone {
+  display: flex;
+  max-width: 420px;
+  min-width: 260px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  flex-direction: column;
+  gap: 5px;
+  color: #ffffff;
+  background: rgba(20, 20, 20, 0.28);
+  text-align: left;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.journey-select-zone span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.journey-select-zone small {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.journey-select-zone:hover {
+  border-color: #ffffff;
+  background: rgba(20, 20, 20, 0.42);
+}
+
+.journey-select-ai,
+.journey-select-heritage,
+.journey-select-operation,
+.journey-select-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(20, 20, 20, 0.32);
+  font-size: 12px;
+  line-height: 1.5;
+  backdrop-filter: blur(4px);
+}
+
+.journey-select-ai strong,
+.journey-select-heritage strong {
+  flex: 0 0 auto;
+}
+
+.journey-select-recommendations .product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 322px));
+  justify-content: space-between;
+  gap: 42px;
+}
+
+.journey-select-experience .product-card {
+  display: flex;
+  min-width: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  flex-direction: column;
+  background: transparent;
+}
+
+.journey-select-experience .product-card.is-selected {
+  border: 0;
+  box-shadow: none;
+}
+
+.journey-select-experience .product-select-target {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  flex-direction: column;
+  gap: 8px;
+  color: #ffffff;
+  background: transparent;
+  text-align: center;
+  cursor: pointer;
+}
+
+.journey-select-experience .product-select-target:disabled {
+  cursor: default;
+}
+
+.journey-select-experience .product-media {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 323px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  place-items: center;
+  background: #f7f7f7;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.journey-select-experience .product-select-target:hover:not(:disabled) .product-media {
+  border-color: #ffffff;
+  transform: translateY(-3px);
+}
+
+.journey-select-experience .product-card.is-selected .product-media {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.42);
+}
+
+.journey-select-experience .product-media img {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: clamp(14px, 1.8vw, 24px);
+  object-fit: contain;
+  object-position: center;
+}
+
+.journey-select-experience .image-fallback {
+  position: absolute;
+  color: #6b665d;
+  font-family: Georgia, serif;
+  font-size: 22px;
+}
+
+.journey-select-experience .product-media.image-unavailable img {
+  display: none;
+}
+
+.journey-select-experience .product-card-copy {
+  display: flex;
+  min-width: 0;
+  padding: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.journey-select-experience .product-card-copy > strong {
+  min-height: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.journey-select-experience .product-meta {
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.journey-select-experience .recommendation-badge {
+  order: -1;
+  width: fit-content;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(20, 20, 20, 0.42);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.journey-select-experience .recommendation-reason {
+  display: flex;
+  max-width: 100%;
+  padding: 7px 9px;
+  border-radius: 4px;
+  flex-direction: column;
+  gap: 3px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(20, 20, 20, 0.3);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.journey-select-experience .recommendation-reason-label {
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.journey-select-experience .selected-label,
+.journey-select-experience .rejected-label {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.journey-select-experience .selected-label {
+  color: #183f2c;
+  background: #d9f3e5;
+}
+
+.journey-select-experience .rejected-label {
+  color: #682a25;
+  background: #f6dcd8;
+}
+
+.journey-select-experience .product-card:has(.rejected-label) .product-media {
+  opacity: 0.62;
+  filter: grayscale(0.55);
+}
+
+.journey-select-experience .product-card-actions {
+  display: flex;
+  min-height: 42px;
+  padding: 3px 0 0;
+  border: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.journey-select-experience .product-card-actions .button {
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 4px;
+  color: #ffffff;
+  background: rgba(20, 20, 20, 0.28);
+  font-size: 11px;
+  text-align: center;
+}
+
+.journey-select-experience .product-card-actions .button:hover:not(:disabled) {
+  border-color: #ffffff;
+  background: rgba(20, 20, 20, 0.46);
+}
+
+.journey-select-experience .product-card-actions .button:disabled {
+  opacity: 0.55;
+}
+
+.journey-select-experience .inline-pending {
+  color: #ffffff;
+  font-size: 11px;
+}
+
+.journey-select-heritage {
+  align-items: flex-start;
+}
+
+.journey-select-heritage span {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.journey-select-error {
+  margin: 0;
+  border-color: rgba(255, 192, 185, 0.75);
+  color: #fff1ef;
+  background: rgba(105, 29, 22, 0.64);
+}
+
+.journey-select-operation .loading-mark {
+  flex: 0 0 auto;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+}
+
+.journey-select-actions {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.journey-select-progress,
+.journey-select-actions .button {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 5px;
+  align-items: center;
+  gap: 9px;
+  color: #ffffff;
+  background: rgba(20, 20, 20, 0.36);
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.journey-select-actions .button {
+  background: #ffffff;
+  color: #222222;
+}
+
+.journey-select-progress:hover:not(:disabled),
+.journey-select-actions .button:hover:not(:disabled) {
+  border-color: #ffffff;
+  background: rgba(20, 20, 20, 0.56);
+  color: #ffffff;
+}
+
+.journey-select-progress:disabled,
+.journey-select-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1050px) {
+  .journey-select-body {
+    width: min(900px, calc(100% - 40px));
+  }
+
+  .journey-select-recommendations .product-grid {
+    gap: 22px;
+  }
+
+  .journey-select-experience .product-media {
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .journey-select-page {
+    padding: 0;
+  }
+
+  .journey-select-experience {
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .journey-select-body {
+    width: min(100% - 32px, 560px);
+    min-height: 100vh;
+    padding: 32px 0;
+  }
+
+  .journey-select-step {
+    margin-bottom: 4px;
+  }
+
+  .journey-select-heading-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .journey-select-heading {
+    padding: 0;
+  }
+
+  .journey-select-zone {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .journey-select-recommendations .product-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .journey-select-experience .product-media {
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  .journey-select-ai,
+  .journey-select-heritage {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

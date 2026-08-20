@@ -10,6 +10,10 @@ import {
   disconnectPrisma,
   prisma,
 } from "../apps/server/src/lib/prisma.js";
+import {
+  mcmProductSeeds,
+  mcmTagSeeds,
+} from "./mcm-product-catalog.js";
 
 const seedDate = new Date("2026-08-01T09:00:00.000Z");
 
@@ -37,7 +41,7 @@ const userSeeds = [
   },
 ] as const;
 
-const productSeeds = [
+const demoProductSeeds = [
   {
     id: "40000000-0000-4000-8000-000000000001",
     sku: "DEMO-BAG-001",
@@ -184,7 +188,7 @@ const productSeeds = [
   },
 ] as const;
 
-const tagSeeds = [
+const demoTagSeeds = [
   ["DEMO-BAG-001", ProductTagType.STYLE, "URBAN", 92],
   ["DEMO-BAG-001", ProductTagType.FUNCTION, "HIGH_CAPACITY", 95],
   ["DEMO-BAG-001", ProductTagType.SILHOUETTE, "STRUCTURED", 86],
@@ -213,6 +217,9 @@ const tagSeeds = [
   ["DEMO-ACC-003", ProductTagType.FUNCTION, "MODULAR", 97],
   ["DEMO-ACC-003", ProductTagType.SILHOUETTE, "LINEAR", 82],
 ] as const;
+
+const productSeeds = [...demoProductSeeds, ...mcmProductSeeds];
+const tagSeeds = [...demoTagSeeds, ...mcmTagSeeds];
 
 async function seedUsers() {
   return Promise.all(

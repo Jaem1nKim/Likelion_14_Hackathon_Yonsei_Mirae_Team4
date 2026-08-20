@@ -1,0 +1,352 @@
+.passport-figma-page {
+  min-height: 902px;
+  color: #1f2937;
+  background: #ffffff;
+  font-family: Pretendard, Inter, "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+.passport-figma-page .introduction-header {
+  height: 73px;
+  padding: 0 24px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #222222;
+}
+
+.passport-figma-page .introduction-header__nav {
+  gap: 16px;
+  font-weight: 500;
+}
+
+.passport-figma-page__body {
+  display: flex;
+  min-height: 829px;
+  flex-direction: column;
+  gap: 21px;
+  padding: 30px 120px 60px;
+}
+
+.passport-figma-page__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.passport-figma-page__heading h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.passport-status {
+  padding: 5px 9px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  color: #4b5563;
+  background: #f7f7f7;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.passport-status--reserved,
+.passport-status--checked_in {
+  color: #315b43;
+  border-color: #bdd5c7;
+  background: #edf6f0;
+}
+
+.passport-status--completed {
+  color: #314f70;
+  border-color: #c5d5e8;
+  background: #eff5fb;
+}
+
+.passport-status--cancelled,
+.passport-status--expired {
+  color: #76271d;
+  border-color: #e4c3be;
+  background: #fff0ed;
+}
+
+.passport-figma-page .passport-figma-content {
+  display: grid;
+  min-height: 340px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.passport-figma-content__left {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.passport-figma-card {
+  min-width: 80px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  background: #f7f7f7;
+}
+
+.passport-figma-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.passport-summary-list {
+  display: flex;
+  margin: 12px 0 0;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.passport-summary-list > div {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.35fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.passport-summary-list dt {
+  color: #4b5563;
+  font-weight: 400;
+}
+
+.passport-summary-list dd {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.passport-summary-list dd strong {
+  font-weight: 500;
+}
+
+.passport-summary-list dd small {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.passport-summary-code {
+  font-family: "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.08em;
+}
+
+.passport-experience-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.passport-experience-card p,
+.passport-experience-card small {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.passport-experience-card p {
+  font-size: 14px;
+}
+
+.passport-experience-card small {
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.passport-qr-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 6px;
+}
+
+.passport-qr-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.passport-qr-card__heading .qr-ready {
+  margin: 0;
+  color: #315b43;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.passport-qr-token {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  overflow: hidden;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.passport-qr-token span {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.passport-qr-token__svg {
+  display: block;
+  width: min(100%, 240px);
+  height: auto;
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  background: #ffffff;
+}
+
+.passport-qr-token__value {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.passport-qr-token code {
+  max-width: 100%;
+  color: #1f2937;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.passport-qr-token__unavailable {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.passport-qr-card > p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.passport-qr-card .reservation-code {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+  color: #1f2937;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  overflow-wrap: anywhere;
+}
+
+.passport-figma-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.passport-figma-button {
+  min-width: 60px;
+  min-height: 35px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.passport-figma-button--primary {
+  border: 1px solid #222222;
+  color: #ffffff;
+  background: #222222;
+}
+
+.passport-figma-button--secondary {
+  border: 1px solid #1f2937;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.passport-figma-button--text {
+  border: 1px solid transparent;
+  color: #6b7280;
+  background: transparent;
+}
+
+.passport-figma-page__state .state-panel {
+  background: #f7f7f7;
+}
+
+@media (max-width: 900px) {
+  .passport-figma-page__body {
+    padding-right: 48px;
+    padding-left: 48px;
+  }
+}
+
+@media (max-width: 760px) {
+  .passport-figma-page {
+    min-height: 100vh;
+  }
+
+  .passport-figma-page .introduction-header {
+    height: 64px;
+    padding: 0 20px;
+  }
+
+  .passport-figma-page__body {
+    min-height: calc(100vh - 64px);
+    padding: 28px 20px 48px;
+  }
+
+  .passport-figma-page .passport-figma-content {
+    grid-template-columns: 1fr;
+  }
+
+  .passport-qr-token {
+    min-height: 180px;
+  }
+
+  .passport-summary-list > div {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .passport-figma-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .passport-figma-button {
+    width: 100%;
+    min-height: 42px;
+  }
+}

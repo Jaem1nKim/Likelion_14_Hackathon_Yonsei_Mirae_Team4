@@ -21,9 +21,17 @@ import {
 } from "../features/journey/journey-navigation";
 import { useJourneyAggregate } from "../features/journey/use-journey-aggregate";
 import { ProductRecommendationCard } from "../features/product-selection/ProductRecommendationCard";
+import { ProductImage } from "../features/product-selection/ProductImage";
 import { createUuidV4 } from "../utils/uuid";
 
 const STAGE_LABEL = { BAG: "BAG", APPAREL: "APPAREL", ACCESSORY: "ACCESSORY" } as const;
+const STAGE_NUMBER = { BAG: 1, APPAREL: 2, ACCESSORY: 3 } as const;
+const JOURNEY_NAV_VIEWS = ["select", "route", "progress"] as const;
+const JOURNEY_VIEW_LABEL = {
+  select: "제품 선택",
+  route: "구역 안내",
+  progress: "진행 현황",
+} as const;
 
 type Props = { view: ActiveJourneyView };
 type Operation = "next" | "finish" | null;
@@ -162,6 +170,229 @@ export function JourneyPage({ view }: Props) {
     ACCESSORY: "지금까지의 선택을 분석해 마지막 디테일을 추천했어요.",
   }[activeStage];
 
+  if (view === "select") {
+    const stageNumber = STAGE_NUMBER[activeStage];
+    return (
+      <div className="journey-select-page">
+        <main className="journey-select-experience">
+          <div className="journey-select-overlay" aria-hidden="true" />
+          <div className="journey-select-body">
+            <div className="journey-select-main">
+              <p className="journey-select-step" aria-label={`Journey ${stageNumber}단계 중 3단계`}>
+                {stageNumber} / 3
+              </p>
+
+              <div className="journey-select-heading-row">
+                <header className="journey-select-heading">
+                  <p>{String(stageNumber).padStart(2, "0")} — {STAGE_LABEL[activeStage]}</p>
+                  <h1>{step.scenarioTitle}</h1>
+                  <p>{step.scenarioText}</p>
+                </header>
+
+                <button
+                  className="journey-select-zone"
+                  type="button"
+                  onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/route`)}
+                >
+                  <span>{step.zone.name}{step.zone.floor ? ` · ${step.zone.floor}` : ""}</span>
+                  <small>{step.zone.directionText}</small>
+                </button>
+              </div>
+
+              {aiPersonalized && (
+                <aside className="journey-select-ai" aria-label="AI 맞춤 추천">
+                  <strong>✦ AI 맞춤 추천</strong>
+                  <span>{aiPersonalizationCopy}</span>
+                </aside>
+              )}
+
+              <section className="journey-select-recommendations" aria-labelledby="recommendations-title">
+                <h2 id="recommendations-title" className="visually-hidden">오늘의 추천</h2>
+                <div className="product-grid">
+                  {step.recommendations.map((recommendation) => (
+                    <ProductRecommendationCard
+                      key={recommendation.id}
+                      recommendation={recommendation}
+                      selected={step.selectedProduct?.id === recommendation.product.id}
+                      rejected={rejectedIds.has(recommendation.product.id)}
+                      pending={pendingProductId === recommendation.product.id}
+                      disabled={pendingProductId !== null || operation !== null}
+                      aiPersonalized={aiPersonalized}
+                      onInteraction={(type) => void handleInteraction(recommendation.product.id, type)}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              {(step.heritageTitle || step.heritageText) && (
+                <aside className="journey-select-heritage" aria-label="MCM Heritage">
+                  <strong>{step.heritageTitle ?? step.zone.heritageTitle}</strong>
+                  <span>{step.heritageText ?? step.zone.heritageStory}</span>
+                </aside>
+              )}
+
+              {actionError && <p className="journey-select-error" role="alert">{actionError}</p>}
+              {operation && (
+                <div className="journey-select-operation" role="status" aria-live="polite">
+                  <span className="loading-mark" aria-hidden="true" />
+                  <span>{operation === "next" ? "지금까지의 선택을 반영해 다음 스타일을 찾고 있어요." : "선택의 흐름을 분석해 Journey Signature를 완성하고 있어요."}</span>
+                </div>
+              )}
+            </div>
+
+            <footer className="journey-select-actions">
+              <button
+                className="journey-select-progress"
+                type="button"
+                disabled={operation !== null || pendingProductId !== null}
+                onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/progress`)}
+              >
+                <span aria-hidden="true">←</span>
+                진행 현황
+              </button>
+              {step.stage === "ACCESSORY" ? (
+                <PrimaryButton type="button" disabled={!currentAggregate.canFinishJourney} isLoading={operation === "finish"} onClick={() => void handleFinish()}>
+                  Journey 완성하기 <span aria-hidden="true">→</span>
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton type="button" disabled={!step.selectedProduct} isLoading={operation === "next"} onClick={() => void handleNext()}>
+                  다음 Journey <span aria-hidden="true">→</span>
+                </PrimaryButton>
+              )}
+            </footer>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (view === "route" || view === "progress") {
+    const stageNumber = STAGE_NUMBER[activeStage];
+    const completedByStage = new Map(
+      currentAggregate.completedSteps.map((completedStep) => [completedStep.stage, completedStep]),
+    );
+    const progressStages = (["BAG", "APPAREL", "ACCESSORY"] as const).map((stage, index) => {
+      const completedStep = completedByStage.get(stage);
+      const stageStep = completedStep ?? (currentStep.stage === stage ? currentStep : null);
+      const status = completedStep ? "completed" : currentStep.stage === stage ? "current" : "upcoming";
+      return { stage, number: index + 1, step: stageStep, status };
+    });
+
+    return (
+      <div className={`journey-support-page journey-support-page--${view}`}>
+        <main className="journey-support-experience">
+          <div className="journey-support-overlay" aria-hidden="true" />
+          <div className="journey-support-body">
+            <header className="journey-support-topbar">
+              <p aria-label={`Journey ${stageNumber}단계 중 3단계`}>{stageNumber} / 3</p>
+              <span>MCM JOURNEY PASSPORT</span>
+            </header>
+
+            <nav className="journey-support-nav" aria-label="현재 Journey 보기">
+              {JOURNEY_NAV_VIEWS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={view === item ? "is-active" : ""}
+                  aria-current={view === item ? "page" : undefined}
+                  onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/${item}`)}
+                >
+                  <span>{String(JOURNEY_NAV_VIEWS.indexOf(item) + 1).padStart(2, "0")}</span>
+                  {JOURNEY_VIEW_LABEL[item]}
+                </button>
+              ))}
+            </nav>
+
+            {view === "route" ? (
+              <section className="journey-support-route" aria-labelledby="zone-title">
+                <div className="journey-support-route__intro">
+                  <p>{String(stageNumber).padStart(2, "0")} — NEXT SPACE</p>
+                  <h1>다음 Journey 공간으로</h1>
+                  <span>{currentStep.scenarioText}</span>
+                </div>
+
+                <article className="journey-support-destination">
+                  <div className="journey-support-destination__marker" aria-hidden="true">
+                    <span>{currentStep.zone.floor ?? String(stageNumber).padStart(2, "0")}</span>
+                  </div>
+                  <div className="journey-support-destination__copy">
+                    <p>NEXT ZONE</p>
+                    <h2 id="zone-title">{currentStep.zone.name}</h2>
+                    {currentStep.zone.floor && <strong>{currentStep.zone.floor}</strong>}
+                    <p>{currentStep.zone.directionText}</p>
+                    <dl>
+                      <div><dt>JOURNEY STEP</dt><dd>{STAGE_LABEL[activeStage]}</dd></div>
+                      <div><dt>ZONE CATEGORY</dt><dd>{currentStep.zone.category}</dd></div>
+                    </dl>
+                  </div>
+                </article>
+
+                <footer className="journey-support-route__footer">
+                  <p>안내된 공간에서 이번 단계의 실제 추천 상품을 확인하세요.</p>
+                  <button type="button" onClick={() => navigate(journeyPathForAggregate(currentAggregate))}>
+                    추천 제품 보기 <span aria-hidden="true">→</span>
+                  </button>
+                </footer>
+              </section>
+            ) : (
+              <section className="journey-support-progress" aria-labelledby="progress-title">
+                <header className="journey-support-progress__heading">
+                  <div>
+                    <p>YOUR JOURNEY · CURRENT FLOW</p>
+                    <h1 id="progress-title">선택의 흐름</h1>
+                  </div>
+                  <span>완료한 선택과 현재 단계를 한눈에 확인하세요.</span>
+                </header>
+
+                <div className="journey-support-progress__summary">
+                  <JourneyStageProgress aggregate={currentAggregate} />
+                </div>
+
+                <ol className="journey-support-timeline" aria-label="Journey 선택 흐름">
+                  {progressStages.map((item) => {
+                    const selectedProduct = item.step?.selectedProduct;
+                    const statusLabel = item.status === "completed" ? "완료" : item.status === "current" ? "현재 단계" : "예정";
+                    return (
+                      <li className={`is-${item.status}`} key={item.stage} aria-current={item.status === "current" ? "step" : undefined}>
+                        <div className="journey-support-timeline__index">
+                          <span>{String(item.number).padStart(2, "0")}</span>
+                          <small>{statusLabel}</small>
+                        </div>
+                        {selectedProduct ? (
+                          <ProductImage
+                            product={selectedProduct}
+                            className="journey-support-timeline__media"
+                            alt={selectedProduct.name}
+                          />
+                        ) : (
+                          <div className="journey-support-timeline__media">
+                            <span aria-hidden="true">{item.stage}</span>
+                          </div>
+                        )}
+                        <div className="journey-support-timeline__copy">
+                          <p>{item.stage}</p>
+                          <h2>{selectedProduct?.name ?? (item.status === "upcoming" ? "아직 시작 전" : "선택 진행 중")}</h2>
+                          {selectedProduct?.color && <span>{selectedProduct.color}</span>}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+
+                <footer className="journey-support-progress__footer">
+                  <p>{stageNumber} / 3 · {STAGE_LABEL[activeStage]}</p>
+                  <button type="button" onClick={() => navigate(journeyPathForAggregate(currentAggregate))}>
+                    제품 선택으로 돌아가기 <span aria-hidden="true">→</span>
+                  </button>
+                </footer>
+              </section>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <AppLayout>
       <JourneyStageProgress aggregate={currentAggregate} />
@@ -178,44 +409,16 @@ export function JourneyPage({ view }: Props) {
       />
 
       <nav className="journey-view-nav" aria-label="현재 Journey 보기">
-        {(["select", "route", "progress", "decision"] as const).map((item) => (
+        {JOURNEY_NAV_VIEWS.map((item) => (
           <button
             key={item}
             type="button"
-            className={view === item ? "is-active" : ""}
-            aria-current={view === item ? "page" : undefined}
             onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/${item}`)}
           >
-            {{ select: "제품 선택", route: "구역 안내", progress: "진행 현황", decision: "완성하기" }[item]}
+            {JOURNEY_VIEW_LABEL[item]}
           </button>
         ))}
       </nav>
-
-      {view === "route" && (
-        <section className="zone-focus" aria-labelledby="zone-title">
-          <p className="eyebrow">NEXT ZONE</p>
-          <h2 id="zone-title">{step.zone.name}</h2>
-          {step.zone.floor && <span className="zone-floor">{step.zone.floor}</span>}
-          <p>{step.zone.directionText}</p>
-          <button className="button button-primary" type="button" onClick={() => navigate(journeyPathForAggregate(currentAggregate))}>
-            추천 제품 보기
-          </button>
-        </section>
-      )}
-
-      {view === "progress" && (
-        <section className="progress-detail" aria-labelledby="progress-title">
-          <p className="eyebrow">YOUR JOURNEY</p>
-          <h2 id="progress-title">선택의 흐름</h2>
-          {[...currentAggregate.completedSteps, step].map((item) => (
-            <div key={item.id} className="progress-detail-row">
-              <span>{item.stage}</span>
-              <strong>{item.selectedProduct?.name ?? "선택 진행 중"}</strong>
-              <small>{item.status === "COMPLETED" ? "완료" : "현재"}</small>
-            </div>
-          ))}
-        </section>
-      )}
 
       {view === "decision" && (
         <section className="decision-panel" aria-labelledby="decision-title">
@@ -228,66 +431,6 @@ export function JourneyPage({ view }: Props) {
         </section>
       )}
 
-      {view === "select" && (
-        <>
-          <section className="zone-strip" aria-label="현재 매장 구역">
-            <div><span>NEXT ZONE</span><strong>{step.zone.name}</strong></div>
-            <p>{step.zone.directionText}</p>
-            <button className="button button-text" type="button" onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/route`)}>구역 자세히</button>
-          </section>
-
-          {(step.heritageTitle || step.heritageText) && (
-            <section className="heritage-panel" aria-labelledby="heritage-title">
-              <p className="eyebrow">MCM HERITAGE</p>
-              <h2 id="heritage-title">{step.heritageTitle ?? step.zone.heritageTitle}</h2>
-              <p>{step.heritageText ?? step.zone.heritageStory}</p>
-            </section>
-          )}
-
-          <section aria-labelledby="recommendations-title">
-            <div className="section-heading">
-              <h2 id="recommendations-title">오늘의 추천</h2>
-              <p>제품을 직접 비교하고 현재 Journey에 연결할 하나를 선택하세요.</p>
-            </div>
-            <div className="product-grid">
-              {step.recommendations.map((recommendation) => (
-                <ProductRecommendationCard
-                  key={recommendation.id}
-                  recommendation={recommendation}
-                  selected={step.selectedProduct?.id === recommendation.product.id}
-                  rejected={rejectedIds.has(recommendation.product.id)}
-                  pending={pendingProductId === recommendation.product.id}
-                  disabled={pendingProductId !== null || operation !== null}
-                  aiPersonalized={aiPersonalized}
-                  onInteraction={(type) => void handleInteraction(recommendation.product.id, type)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {actionError && <p className="form-error" role="alert">{actionError}</p>}
-          {operation && (
-            <div className="journey-operation" role="status" aria-live="polite">
-              <span className="loading-mark" aria-hidden="true" />
-              <span>{operation === "next" ? "지금까지의 선택을 반영해 다음 스타일을 찾고 있어요." : "선택의 흐름을 분석해 Journey Signature를 완성하고 있어요."}</span>
-            </div>
-          )}
-          <div className="page-actions page-actions-split journey-actions">
-            <button className="button button-secondary" type="button" onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/progress`)}>
-              진행 현황
-            </button>
-            {step.stage === "ACCESSORY" ? (
-              <PrimaryButton type="button" disabled={!currentAggregate.canFinishJourney} isLoading={operation === "finish"} onClick={() => void handleFinish()}>
-                Journey 완성하기
-              </PrimaryButton>
-            ) : (
-              <PrimaryButton type="button" disabled={!step.selectedProduct} isLoading={operation === "next"} onClick={() => void handleNext()}>
-                다음 Journey
-              </PrimaryButton>
-            )}
-          </div>
-        </>
-      )}
     </AppLayout>
   );
 }

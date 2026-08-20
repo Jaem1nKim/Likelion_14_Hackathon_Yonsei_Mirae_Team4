@@ -1,0 +1,280 @@
+.question-figma-page {
+  min-height: 928px;
+  color: #1f2937;
+  background: #ffffff;
+  font-family: Pretendard, Inter, "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+.question-figma-page .introduction-header {
+  height: 73px;
+  padding: 0 24px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #222222;
+}
+
+.question-figma-page .introduction-header__nav {
+  gap: 16px;
+  font-weight: 500;
+}
+
+.question-figma-page__body {
+  display: flex;
+  min-height: 855px;
+  flex-direction: column;
+  gap: 21px;
+  padding: 30px 120px 60px;
+}
+
+.question-figma-page__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.question-figma-page__heading h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.question-figma-page__heading span {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.question-figma-page__lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: normal;
+}
+
+.question-reservation-card,
+.question-choice-card {
+  width: 100%;
+  min-width: 80px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  background: #f7f7f7;
+}
+
+.question-reservation-card h2,
+.question-choice-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.question-reservation-card__details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.question-reservation-card__details > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.question-reservation-card__details > div + div {
+  padding-left: 24px;
+  border-left: 1px solid #e5e7eb;
+}
+
+.question-reservation-card__details span {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.question-reservation-card__details strong {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.question-reservation-card__details small {
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.question-choice-card > p {
+  margin: 8px 0 12px;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.question-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.question-choice {
+  display: grid;
+  width: 100%;
+  min-height: 64px;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 0;
+  color: #1f2937;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.question-choice:hover {
+  border-color: #6b7280;
+}
+
+.question-choice.is-selected {
+  border-color: #222222;
+  box-shadow: inset 0 0 0 1px #222222;
+}
+
+.question-choice > img,
+.question-choice__radio {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.question-choice__radio {
+  border: 1.5px solid #d1d5db;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.question-choice__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.question-choice__copy strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.question-choice__copy small {
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.question-choice__state {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.question-choice.is-selected .question-choice__state {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.question-figma-page__error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 5px;
+  color: #76271d;
+  background: #fff0ed;
+  font-size: 14px;
+}
+
+.question-figma-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 13px;
+}
+
+.question-figma-button,
+.question-figma-actions .button {
+  min-width: 60px;
+  min-height: 35px;
+  height: 35px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.question-figma-button--secondary {
+  border: 1px solid #222222;
+  color: #222222;
+  background: #ffffff;
+}
+
+.question-figma-actions .button-primary {
+  border: 1px solid #222222;
+  color: #ffffff;
+  background: #222222;
+}
+
+.question-figma-button:disabled,
+.question-figma-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+@media (max-width: 900px) {
+  .question-figma-page__body {
+    padding-right: 48px;
+    padding-left: 48px;
+  }
+}
+
+@media (max-width: 760px) {
+  .question-figma-page {
+    min-height: 100vh;
+  }
+
+  .question-figma-page .introduction-header {
+    height: 64px;
+    padding: 0 20px;
+  }
+
+  .question-figma-page__body {
+    min-height: calc(100vh - 64px);
+    padding: 28px 20px 48px;
+  }
+
+  .question-reservation-card__details {
+    grid-template-columns: 1fr;
+  }
+
+  .question-reservation-card__details > div + div {
+    padding-top: 12px;
+    padding-left: 0;
+    border-top: 1px solid #e5e7eb;
+    border-left: 0;
+  }
+
+  .question-choice {
+    grid-template-columns: 16px minmax(0, 1fr);
+  }
+
+  .question-choice__state {
+    grid-column: 2;
+  }
+}

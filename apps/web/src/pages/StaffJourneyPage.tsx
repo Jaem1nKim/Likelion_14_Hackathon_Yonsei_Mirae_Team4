@@ -4,10 +4,22 @@ import { Link, useParams } from "react-router-dom";
 
 import { errorMessage } from "../api/api-client";
 import { getStaffJourney } from "../api/staff-api";
-import { AppLayout } from "../components/AppLayout";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
-import { PageHeader } from "../components/PageHeader";
+import { StaffHeader } from "../components/StaffHeader";
+
+function formatReservationTime(value: string) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function startQuestionLabel(code: string) {
+  return code === "TODAY_INTENT"
+    ? "오늘 매장에서 어떤 변화를 시도하고 싶나요?"
+    : code;
+}
 
 export function StaffJourneyPage() {
   const { journeyId } = useParams();
@@ -40,41 +52,226 @@ export function StaffJourneyPage() {
     return names;
   }, [view]);
 
-  if (error) return <AppLayout><ErrorState message={error} onRetry={() => setAttempt((value) => value + 1)} /></AppLayout>;
-  if (!view) return <AppLayout><LoadingState message="직원용 Journey 요약을 불러오고 있습니다." /></AppLayout>;
+  if (error) {
+    return (
+      <div className="staffx-page">
+        <StaffHeader />
+        <main className="staffx-main"><ErrorState message={error} onRetry={() => setAttempt((value) => value + 1)} /></main>
+      </div>
+    );
+  }
+  if (!view) {
+    return (
+      <div className="staffx-page">
+        <StaffHeader />
+        <main className="staffx-main"><LoadingState message="직원용 Journey 요약을 불러오고 있습니다." /></main>
+      </div>
+    );
+  }
 
-  const decisionInteractions = view.interactions.filter((item) => item.type === "SELECTED" || item.type === "REJECTED" || item.type === "DESELECTED");
+  const decisionInteractions = view.interactions.filter(
+    (item) => item.type === "SELECTED" || item.type === "REJECTED" || item.type === "DESELECTED",
+  );
+  const currentStep = view.steps.find((step) => step.stepNumber === view.journey.currentStepNumber)
+    ?? view.steps[view.steps.length - 1]
+    ?? null;
 
   return (
-    <AppLayout>
-      <PageHeader eyebrow="STAFF JOURNEY VIEW" title={`${view.customer.name} 고객 Journey`} description={view.customer.profileType ?? "Journey Customer"} />
-      <section className="staff-overview" aria-label="Journey 상태">
-        <div><span>Journey</span><strong>{view.journey.status}</strong></div>
-        <div><span>현재 단계</span><strong>{view.journey.currentStage}</strong></div>
-        <div><span>Step</span><strong>{view.journey.currentStepNumber}</strong></div>
-        <div><span>예약 시간</span><strong>{new Date(view.reservation.reservedAt).toLocaleString("ko-KR")}</strong></div>
-      </section>
+    <div className="staffx-page">
+      <StaffHeader />
+      <main className="staffx-main staffx-briefing">
+        <header className="staffx-page-heading staffx-page-heading--briefing">
+          <div>
+            <p>CUSTOMER BRIEFING</p>
+            <h1>{view.customer.name} 고객 Journey</h1>
+            <span>실제 예약과 Journey 기록을 바탕으로 정리된 매장 응대 정보입니다.</span>
+          </div>
+          <Link className="staffx-back-link" to="/staff/reservations">예약 고객 목록으로 <span aria-hidden="true">↗</span></Link>
+        </header>
 
-      <section className="staff-section" aria-labelledby="snapshot-title">
-        <p className="eyebrow">TASTE SNAPSHOT</p><h2 id="snapshot-title">고객 취향과 오늘의 방향</h2>
-        {view.profileSnapshot ? <><p>{view.profileSnapshot.longTermTasteSummary}</p><p>{view.profileSnapshot.todayIntentSummary}</p><div className="staff-score-grid"><span>실용성 <strong>{view.profileSnapshot.practicalityScore}</strong></span><span>표현성 <strong>{view.profileSnapshot.expressionScore}</strong></span><span>새로움 <strong>{view.profileSnapshot.noveltyScore}</strong></span></div></> : <p className="empty-state">Journey 시작 전이라 Snapshot이 아직 없습니다.</p>}
-      </section>
+        <section className="staffx-journey-overview" aria-label="Journey 상태">
+          <div><span>Journey 상태</span><strong>{view.journey.status}</strong></div>
+          <div><span>현재 단계</span><strong>{view.journey.currentStage}</strong></div>
+          <div><span>Step</span><strong>{view.journey.currentStepNumber}</strong></div>
+          <div><span>방문 일정</span><strong>{formatReservationTime(view.reservation.reservedAt)}</strong></div>
+        </section>
 
-      <section className="staff-section" aria-labelledby="steps-title">
-        <p className="eyebrow">JOURNEY STEPS</p><h2 id="steps-title">선택 단계</h2>
-        {view.steps.length === 0 ? <p className="empty-state">아직 생성된 단계가 없습니다.</p> : <div className="staff-step-list">{view.steps.map((step) => {
-          const selectedReason = step.recommendations.find((item) => item.product.id === step.selectedProduct?.id)?.reason ?? null;
-          return <article key={step.id}><span>STEP {step.stepNumber} · {step.stage}</span><h3>{step.scenarioTitle}</h3><p>{step.selectedProduct ? `선택: ${step.selectedProduct.name}` : "선택 진행 중"}</p>{selectedReason && <small>{selectedReason}</small>}<strong>{step.status}</strong></article>;
-        })}</div>}
-      </section>
+        <div className="staffx-briefing-grid">
+          <div className="staffx-briefing-column">
+            <section className="staffx-card staffx-customer-card">
+              <div className="staffx-section-heading">
+                <p>CUSTOMER</p>
+                <h2>고객 정보</h2>
+              </div>
+              <div className="staffx-customer-card__person">
+                <span aria-hidden="true">{view.customer.name.trim().charAt(0) || "M"}</span>
+                <div>
+                  <strong>{view.customer.name}</strong>
+                  <p>{view.customer.profileType ?? "Journey Customer"}</p>
+                </div>
+              </div>
+              <dl className="staffx-customer-card__facts">
+                <div><dt>예약 일시</dt><dd>{formatReservationTime(view.reservation.reservedAt)}</dd></div>
+                <div><dt>방문 매장</dt><dd>{view.reservation.store.name}</dd></div>
+                <div><dt>매장 위치</dt><dd>{view.reservation.store.location}</dd></div>
+              </dl>
+            </section>
 
-      <section className="staff-section" aria-labelledby="interactions-title">
-        <p className="eyebrow">DECISIONS</p><h2 id="interactions-title">선택 변화 요약</h2>
-        {decisionInteractions.length === 0 ? <p className="empty-state">아직 선택 기록이 없습니다.</p> : <ol className="staff-interactions">{decisionInteractions.map((interaction) => <li key={interaction.id}><span>{interaction.sequence}</span><strong>{interaction.type}</strong><p>{productNames.get(interaction.productId) ?? "제품"}</p></li>)}</ol>}
-      </section>
+            <section className="staffx-card">
+              <div className="staffx-section-heading">
+                <p>START QUESTION</p>
+                <h2>Journey 시작 질문 응답</h2>
+              </div>
+              <div className="staffx-answer">
+                <span>{startQuestionLabel(view.reservation.startQuestionCode)}</span>
+                <blockquote>{view.reservation.startAnswerLabel}</blockquote>
+                <small>{view.reservation.startAnswerCode}</small>
+              </div>
+            </section>
 
-      {view.result && <section className="staff-result" aria-labelledby="staff-result-title"><p className="eyebrow">SERVICE SUMMARY</p>{!view.result.usedFallback && <span className="staff-ai-status">AI Personalization 적용</span>}<h2 id="staff-result-title">{view.result.signatureName}</h2><p>{view.result.finalLookSummary}</p><div className="staff-final-products">{view.result.items.map((item) => <span key={item.id}>{item.selectionOrder}. {item.product.name}</span>)}</div><blockquote>{view.result.staffSummary}</blockquote></section>}
-      <div className="page-actions"><Link className="button button-secondary" to="/staff/reservations">예약 목록으로</Link></div>
-    </AppLayout>
+            <section className="staffx-card">
+              <div className="staffx-section-heading">
+                <p>TASTE SNAPSHOT</p>
+                <h2>고객 취향과 오늘의 방향</h2>
+              </div>
+              {view.profileSnapshot ? (
+                <>
+                  <div className="staffx-editorial-summary">
+                    <span>LONG-TERM TASTE</span>
+                    <p>{view.profileSnapshot.longTermTasteSummary}</p>
+                    <span>TODAY'S DIRECTION</span>
+                    <p>{view.profileSnapshot.todayIntentSummary}</p>
+                  </div>
+                  <div className="staffx-score-grid" aria-label="취향 점수">
+                    <div><span>실용성</span><strong>{view.profileSnapshot.practicalityScore}</strong></div>
+                    <div><span>표현성</span><strong>{view.profileSnapshot.expressionScore}</strong></div>
+                    <div><span>새로움</span><strong>{view.profileSnapshot.noveltyScore}</strong></div>
+                  </div>
+                  <div className="staffx-preferences" aria-label="선호 데이터">
+                    {view.profileSnapshot.preferences.map((preference, index) => (
+                      <span key={`${preference.type}-${preference.value}-${index}`}>
+                        <small>{preference.type}</small>
+                        {preference.value}
+                        <strong>{preference.score}</strong>
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="staffx-inline-empty">
+                  <strong>Snapshot 준비 전</strong>
+                  <p>Journey가 시작되면 고객 취향과 오늘의 방향이 표시됩니다.</p>
+                </div>
+              )}
+            </section>
+          </div>
+
+          <div className="staffx-briefing-column">
+            <section className="staffx-card">
+              <div className="staffx-section-heading">
+                <p>JOURNEY STEPS</p>
+                <h2>단계별 추천과 선택</h2>
+              </div>
+              {view.steps.length === 0 ? (
+                <div className="staffx-inline-empty">
+                  <strong>추천 상품 준비 전</strong>
+                  <p>첫 Journey 단계가 생성되면 실제 추천 상품과 구역 정보가 표시됩니다.</p>
+                </div>
+              ) : (
+                <div className="staffx-step-list">
+                  {view.steps.map((step) => (
+                    <article key={step.id} className={step.stepNumber === view.journey.currentStepNumber ? "is-current" : undefined}>
+                      <div className="staffx-step-list__header">
+                        <span>STEP {step.stepNumber} · {step.stage}</span>
+                        <strong>{step.status}</strong>
+                      </div>
+                      <h3>{step.scenarioTitle}</h3>
+                      <p className="staffx-step-list__zone">
+                        {step.zone.floor ? `${step.zone.floor} · ` : ""}{step.zone.name}
+                      </p>
+                      <p>{step.selectedProduct ? `선택: ${step.selectedProduct.name}` : "선택 진행 중"}</p>
+                      <div className="staffx-recommendations">
+                        {step.recommendations.map((recommendation) => (
+                          <div key={recommendation.id} className={recommendation.product.id === step.selectedProduct?.id ? "is-selected" : undefined}>
+                            <img
+                              src={recommendation.product.imageUrl}
+                              alt={recommendation.product.name}
+                              onError={(event) => { event.currentTarget.hidden = true; }}
+                            />
+                            <span>
+                              <small>{recommendation.type} · RANK {recommendation.rank}</small>
+                              <strong>{recommendation.product.name}</strong>
+                              <em>{recommendation.product.color}</em>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="staffx-card">
+              <div className="staffx-section-heading">
+                <p>CURRENT ROUTE</p>
+                <h2>현재 구역 안내</h2>
+              </div>
+              {currentStep ? (
+                <div className="staffx-route-card">
+                  <span>{currentStep.zone.floor ?? "매장 구역"}</span>
+                  <h3>{currentStep.zone.name}</h3>
+                  <p>{currentStep.zone.directionText}</p>
+                </div>
+              ) : (
+                <div className="staffx-inline-empty"><p>현재 안내할 Journey 구역이 없습니다.</p></div>
+              )}
+            </section>
+
+            <section className="staffx-card">
+              <div className="staffx-section-heading">
+                <p>DECISIONS</p>
+                <h2>선택 변화 기록</h2>
+              </div>
+              {decisionInteractions.length === 0 ? (
+                <div className="staffx-inline-empty"><p>아직 선택 기록이 없습니다.</p></div>
+              ) : (
+                <ol className="staffx-interactions">
+                  {decisionInteractions.map((interaction) => (
+                    <li key={interaction.id}>
+                      <span>{String(interaction.sequence).padStart(2, "0")}</span>
+                      <strong className={`is-${interaction.type.toLowerCase()}`}>{interaction.type}</strong>
+                      <p>{productNames.get(interaction.productId) ?? "제품"}</p>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+          </div>
+        </div>
+
+        {view.result && (
+          <section className="staffx-result">
+            <div className="staffx-result__copy">
+              <p>SERVICE SUMMARY</p>
+              {!view.result.usedFallback && <span className="staffx-ai-status">AI Personalization 적용</span>}
+              <h2>{view.result.signatureName}</h2>
+              <strong>{view.result.signatureStory}</strong>
+              <p>{view.result.finalLookSummary}</p>
+              <blockquote>{view.result.staffSummary}</blockquote>
+            </div>
+            <div className="staffx-result__products">
+              {view.result.items.map((item) => (
+                <article key={item.id}>
+                  <img src={item.product.imageUrl} alt={item.product.name} onError={(event) => { event.currentTarget.hidden = true; }} />
+                  <span>{String(item.selectionOrder).padStart(2, "0")}</span>
+                  <div><small>{item.category}</small><strong>{item.product.name}</strong></div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
   );
 }

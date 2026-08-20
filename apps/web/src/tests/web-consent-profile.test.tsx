@@ -8,6 +8,7 @@ import {
   consentMissing,
   customer,
   profile,
+  store,
   success,
 } from "./fixtures";
 import {
@@ -18,14 +19,24 @@ import {
 } from "./test-utils";
 
 describe("consent page", () => {
+  it("returns a reservation consent visit without a draft to reserve", async () => {
+    authenticate();
+    const fetchMock = mockFetchQueue(...authenticatedResponses(success([store])));
+    renderApp("/consent", { reservationFlow: true });
+
+    expect(await screen.findByText(/예약 정보가 없어/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "예약하기" })).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  });
+
   it("loads and displays current consent values", async () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(consentAllowed)));
     renderApp("/consent");
     expect(
-      await screen.findByRole("checkbox", { name: /Journey 진행 및 선택 데이터 활용/ }),
+      await screen.findByRole("checkbox", { name: /Journey 진행 및 제품 선택 데이터 이용/ }),
     ).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: /온라인 취향 행동 데이터 활용/ })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /온라인 관심·행동 정보 활용/ })).toBeChecked();
   });
 
   it("keeps the continue button disabled without required consent", async () => {
@@ -33,7 +44,10 @@ describe("consent page", () => {
     mockFetchQueue(...authenticatedResponses(success(consentMissing)));
     renderApp("/consent");
     expect(
-      await screen.findByRole("button", { name: "동의하고 프로필 확인하기" }),
+      await screen.findByRole("button", { name: "필수 동의만 하고 계속" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "필수·선택 모두 동의하고 계속" }),
     ).toBeDisabled();
   });
 
@@ -41,14 +55,19 @@ describe("consent page", () => {
     const user = userEvent.setup();
     authenticate();
     const fetchMock = mockFetchQueue(
-      ...authenticatedResponses(success(consentMissing), success(consentAllowed), success(profile)),
+      ...authenticatedResponses(
+        success(consentMissing),
+        success(consentAllowed),
+        success(profile),
+        success(consentAllowed),
+      ),
     );
     renderApp("/consent");
     await user.click(
-      await screen.findByRole("checkbox", { name: /Journey 진행 및 선택 데이터 활용/ }),
+      await screen.findByRole("checkbox", { name: /Journey 진행 및 제품 선택 데이터 이용/ }),
     );
-    await user.click(screen.getByRole("checkbox", { name: /온라인 취향 행동 데이터 활용/ }));
-    await user.click(screen.getByRole("button", { name: "동의하고 프로필 확인하기" }));
+    await user.click(screen.getByRole("checkbox", { name: /온라인 관심·행동 정보 활용/ }));
+    await user.click(screen.getByRole("button", { name: "필수·선택 모두 동의하고 계속" }));
     expect(await screen.findByText("나의 Journey Profile")).toBeInTheDocument();
     const request = fetchMock.mock.calls[2]?.[1] as RequestInit;
     expect(JSON.parse(String(request.body))).toEqual({
@@ -57,15 +76,44 @@ describe("consent page", () => {
     });
   });
 
+  it("saves only required consent when the optional action is chosen", async () => {
+    const user = userEvent.setup();
+    authenticate();
+    const fetchMock = mockFetchQueue(
+      ...authenticatedResponses(
+        success(consentMissing),
+        success(consentAllowed),
+        success(profile),
+        success(consentAllowed),
+      ),
+    );
+    renderApp("/consent");
+    await user.click(
+      await screen.findByRole("checkbox", { name: /Journey 진행 및 제품 선택 데이터 이용/ }),
+    );
+    await user.click(screen.getByRole("button", { name: "필수 동의만 하고 계속" }));
+    expect(await screen.findByText("나의 Journey Profile")).toBeInTheDocument();
+    const request = fetchMock.mock.calls[2]?.[1] as RequestInit;
+    expect(JSON.parse(String(request.body))).toEqual({
+      journeyDataAllowed: true,
+      behaviorDataAllowed: false,
+    });
+  });
+
   it("can resave the same consent without changing the client contract", async () => {
     const user = userEvent.setup();
     authenticate();
     mockFetchQueue(
-      ...authenticatedResponses(success(consentAllowed), success(consentAllowed), success(profile)),
+      ...authenticatedResponses(
+        success(consentAllowed),
+        success(consentAllowed),
+        success(profile),
+        success(consentAllowed),
+      ),
     );
     renderApp("/consent");
     await user.click(
-      await screen.findByRole("button", { name: "동의하고 프로필 확인하기" }),
+      await screen.findByRole("button", { name: "필수·선택 모두 동의하고 계속" }),
     );
     expect(await screen.findByText("나의 Journey Profile")).toBeInTheDocument();
   });
@@ -83,10 +131,13 @@ describe("consent page", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
     renderApp("/consent");
-    const button = await screen.findByRole("button", { name: "동의하고 프로필 확인하기" });
+    const button = await screen.findByRole("button", {
+      name: "필수·선택 모두 동의하고 계속",
+    });
     await user.click(button);
-    expect(screen.getByRole("button", { name: "처리 중..." })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "처리 중..." }));
+    expect(button).toBeDisabled();
+    expect(screen.getByRole("button", { name: "필수 동의만 하고 계속" })).toBeDisabled();
+    await user.click(button);
     expect(fetchMock).toHaveBeenCalledTimes(3);
     resolvePut?.(success(consentAllowed));
   });
@@ -95,7 +146,7 @@ describe("consent page", () => {
 describe("profile page", () => {
   it("displays TasteProfile summary and profile type", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     expect(await screen.findByText(profile.tasteProfile.summary)).toBeInTheDocument();
     expect(screen.getByText("Classic Urban")).toBeInTheDocument();
@@ -103,7 +154,7 @@ describe("profile page", () => {
 
   it("displays all four score values", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     await screen.findByText(profile.tasteProfile.summary);
     for (const score of [88, 56, 32, 91]) {
@@ -114,7 +165,7 @@ describe("profile page", () => {
 
   it("groups preferences by their type", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile)));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     expect(await screen.findByText("카테고리")).toBeInTheDocument();
     expect(screen.getByText("컬러")).toBeInTheDocument();
@@ -128,6 +179,7 @@ describe("profile page", () => {
     mockFetchQueue(
       ...authenticatedResponses(
         apiFailure(404, "RESOURCE_NOT_FOUND", "TasteProfile을 찾을 수 없습니다."),
+        success(consentAllowed),
       ),
     );
     renderApp("/profile");
@@ -140,7 +192,8 @@ describe("profile page", () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(success(customer))
-      .mockImplementationOnce(() => new Promise<Response>(() => undefined));
+      .mockImplementationOnce(() => new Promise<Response>(() => undefined))
+      .mockResolvedValueOnce(success(consentAllowed));
     vi.stubGlobal("fetch", fetchMock);
     renderApp("/profile");
     expect(await screen.findByText("취향 프로필을 불러오고 있습니다.")).toBeInTheDocument();
@@ -149,10 +202,20 @@ describe("profile page", () => {
   it("logs out from the profile page", async () => {
     const user = userEvent.setup();
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile), success([customer])));
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
     renderApp("/profile");
     await user.click(await screen.findByRole("button", { name: "로그아웃" }));
-    expect(await screen.findByText("오늘의 프로필을 선택하세요")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Where will your choicetake you/ })).toBeInTheDocument();
     await waitFor(() => expect(localStorage.length).toBe(0));
+  });
+
+  it("displays the current required and optional consent settings", async () => {
+    authenticate();
+    mockFetchQueue(...authenticatedResponses(success(profile), success(consentAllowed)));
+    renderApp("/profile");
+    expect(await screen.findByText("Journey 진행 및 제품 선택 데이터 이용")).toBeInTheDocument();
+    expect(screen.getByText("온라인 관심·행동 정보 활용")).toBeInTheDocument();
+    expect(screen.getAllByText("동의함")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "동의 설정 변경" })).toBeInTheDocument();
   });
 });

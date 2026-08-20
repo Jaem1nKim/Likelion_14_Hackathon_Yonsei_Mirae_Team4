@@ -8,6 +8,7 @@ import { getJourneyResult } from "../api/result-api";
 import { AppLayout } from "../components/AppLayout";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
+import { ProductImage } from "../features/product-selection/ProductImage";
 import { getAccessoryArAsset } from "../features/ar/accessory-ar-assets";
 import {
   calculateAccessoryOverlay,
@@ -27,6 +28,7 @@ import {
 } from "../features/ar/apparel-pose";
 import { drawArOverlayLayers } from "../features/ar/ar-overlay-renderer";
 import { captureArFrame } from "../features/ar/ar-frame-capture";
+import { imageAspectRatio } from "../features/ar/ar-product-overlay-image";
 import { getBagArAsset } from "../features/ar/bag-ar-assets";
 import {
   AR_COMPARISON_CATEGORIES,
@@ -384,13 +386,22 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
       const detection = detector.detectForVideo(video, nowMs);
       const landmarks = detection.landmarks[0];
       const bagTransform = bagAsset
-        ? calculateBagOverlay(landmarks, viewport, bagAsset, true)
+        ? calculateBagOverlay(landmarks, viewport, {
+          ...bagAsset,
+          aspectRatio: imageAspectRatio(bagAssetImageRef.current, bagAsset.aspectRatio),
+        }, true)
         : null;
       const apparelTransform = apparelAsset
         ? calculateApparelOverlay(landmarks, viewport, apparelAsset, true)
         : null;
       const poseAccessoryTransform = accessoryAsset
-        ? calculateAccessoryOverlay(landmarks, viewport, accessoryAsset, true)
+        ? calculateAccessoryOverlay(landmarks, viewport, {
+          ...accessoryAsset,
+          aspectRatio: imageAspectRatio(
+            accessoryAssetImageRef.current,
+            accessoryAsset.aspectRatio,
+          ),
+        }, true)
         : null;
       const bagTracking = updateBagTracking(bagTrackingRef.current, bagTransform, nowMs);
       const apparelTracking = updateApparelTracking(
@@ -573,204 +584,203 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
     || cameraState === "no-person";
 
   return (
-    <AppLayout>
-      <section className="ar-header" aria-labelledby="ar-title">
-        <div>
-          <p className="eyebrow">AR FITTING</p>
-          <h1 id="ar-title">BAG · APPAREL · ACCESSORY 가상 피팅</h1>
-          <ul className="ar-product-list" aria-label="현재 착용 제품">
-            <li><strong>BAG</strong><span>{bagProduct.name}</span></li>
-            <li><strong>APPAREL</strong><span>{apparelProduct?.name ?? "선택된 APPAREL 없음"}</span></li>
-            <li><strong>ACCESSORY</strong><span>{accessoryProduct?.name ?? "선택된 ACCESSORY 없음"}</span></li>
-          </ul>
-        </div>
-        <button className="button button-secondary" type="button" onClick={exitAr}>AR 종료</button>
-      </section>
-
-      <section className="ar-camera-shell" aria-label="실시간 BAG, APPAREL, ACCESSORY 가상 피팅 화면">
-        <video ref={videoRef} className="ar-video" muted playsInline aria-label="전면 카메라 영상" />
-        <canvas ref={canvasRef} className="ar-overlay" aria-hidden="true" />
-        {cameraState === "idle" && <div className="ar-camera-placeholder">카메라를 시작해 착용 위치를 확인해보세요.</div>}
-        <div className={`ar-detection-status ar-status-${cameraState}`} role="status" aria-live="polite">
-          {CAMERA_STATUS[cameraState]}
-        </div>
-      </section>
-
-      {bagAssetState === "missing" && (
-        <div className="ar-asset-warning" role="alert">
-          <strong>BAG AR asset이 준비되지 않았습니다.</strong>
-          <span>{bagAsset?.path ?? "이 제품에 연결된 AR asset 경로가 없습니다."}</span>
-        </div>
-      )}
-      {bagAssetState === "loading" && bagAsset && <p className="ar-asset-loading" role="status">BAG overlay를 준비하고 있어요.</p>}
-
-      {apparelAssetState === "missing" && (
-        <div className="ar-asset-warning" role="alert">
-          <strong>APPAREL AR asset이 준비되지 않았습니다.</strong>
-          <span>{apparelAsset?.path ?? "이 제품에 연결된 AR asset 경로가 없습니다."}</span>
-        </div>
-      )}
-      {apparelAssetState === "loading" && apparelAsset && (
-        <p className="ar-asset-loading" role="status">APPAREL overlay를 준비하고 있어요.</p>
-      )}
-
-      {accessoryAssetState === "missing" && (
-        <div className="ar-asset-warning" role="alert">
-          <strong>ACCESSORY AR 이미지가 준비되지 않았습니다.</strong>
-          <span>{accessoryAsset?.path ?? "이 제품에 연결된 AR asset 경로가 없습니다."}</span>
-        </div>
-      )}
-      {accessoryAssetState === "loading" && accessoryAsset && (
-        <p className="ar-asset-loading" role="status">ACCESSORY overlay를 준비하고 있어요.</p>
-      )}
-
-      <section className="ar-comparison" aria-labelledby="ar-comparison-title">
-        <div className="ar-comparison-header">
+    <div className="ar-experience-page">
+      <main className="ar-experience" aria-labelledby="ar-title">
+        <header className="ar-experience-header">
           <div>
-            <p className="eyebrow">AR PRODUCT COMPARE</p>
-            <h2 id="ar-comparison-title">다른 제품도 바로 착용해보세요</h2>
-            <p>AR 미리보기만 전환되며 Journey에서 확정한 선택은 바뀌지 않습니다.</p>
+            <p className="ar-experience-eyebrow">MCM JOURNEY · VIRTUAL FITTING</p>
+            <h1 id="ar-title">BAG · APPAREL · ACCESSORY 가상 피팅</h1>
+            <p className="ar-experience-lead">Journey가 완성한 Look을 움직이며 확인해보세요.</p>
           </div>
-          <button
-            className="button button-secondary"
-            type="button"
-            disabled={isOriginalPreview}
-            onClick={restoreOriginalSelection}
-          >
-            원래 추천으로 돌아가기
+          <button className="ar-exit-button" type="button" onClick={exitAr}>
+            <span aria-hidden="true">←</span> AR 종료
           </button>
-        </div>
+        </header>
 
-        <div className="ar-comparison-tabs" role="tablist" aria-label="AR 제품 카테고리">
-          {AR_COMPARISON_CATEGORIES.map((category) => (
-            <button
-              id={`ar-tab-${category.toLowerCase()}`}
-              key={category}
-              type="button"
-              role="tab"
-              aria-selected={activeCategory === category}
-              aria-controls="ar-comparison-panel"
-              onClick={() => setActiveCategory(category)}
+        <div className="ar-experience-layout">
+          <div className="ar-stage-column">
+            <section
+              className={`ar-camera-shell${canStart ? "" : " is-camera-active"}`}
+              aria-label="실시간 BAG, APPAREL, ACCESSORY 가상 피팅 화면"
             >
-              {category}
-            </button>
-          ))}
-        </div>
+              <video ref={videoRef} className="ar-video" muted playsInline aria-label="전면 카메라 영상" />
+              <canvas ref={canvasRef} className="ar-overlay" aria-hidden="true" />
+              {canStart && (
+                <div className="ar-camera-placeholder">
+                  <div className="ar-idle-copy">
+                    <span>VIRTUAL FITTING EXPERIENCE</span>
+                    <strong>YOUR LOOK,<br />IN MOTION.</strong>
+                    <small>카메라를 시작해 착용 위치를 확인해보세요.</small>
+                  </div>
+                </div>
+              )}
+              <span className="ar-frame-corner ar-frame-corner-top" aria-hidden="true" />
+              <span className="ar-frame-corner ar-frame-corner-bottom" aria-hidden="true" />
+              <div className={`ar-detection-status ar-status-${cameraState}`} role="status" aria-live="polite">
+                {CAMERA_STATUS[cameraState]}
+              </div>
+              <div className="ar-stage-controls">
+                {canStart && (
+                  <button
+                    className="ar-primary-action"
+                    type="button"
+                    disabled={!bagAsset && !apparelAsset && !accessoryAsset}
+                    onClick={() => void startCamera()}
+                  >
+                    카메라 시작 <span aria-hidden="true">→</span>
+                  </button>
+                )}
+                {!canStart && (
+                  <button
+                    className="ar-primary-action"
+                    type="button"
+                    disabled={!canCapture || !isCaptureReady || isCapturing}
+                    onClick={() => void capturePhoto()}
+                  >
+                    {isCapturing ? "촬영 이미지 준비 중" : "촬영"}
+                  </button>
+                )}
+              </div>
+            </section>
 
-        <div
-          id="ar-comparison-panel"
-          className="ar-comparison-grid"
-          role="tabpanel"
-          aria-labelledby={`ar-tab-${activeCategory.toLowerCase()}`}
-        >
-          {comparisonOptions[activeCategory].map((option) => {
-            const isActive = previewSelection[activeCategory] === option.product.id;
-            return (
-              <button
-                className={`ar-comparison-card${isActive ? " is-active" : ""}`}
-                key={option.product.id}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => previewProduct(activeCategory, option.product.id)}
-              >
-                <span className="ar-comparison-media">
-                  <img src={option.product.imageUrl} alt="" />
-                </span>
-                <span className="ar-comparison-copy">
-                  <span className="ar-comparison-badges">
-                    {option.isAiPick && <strong>AI Pick</strong>}
-                    {isActive && <em>현재 착용</em>}
-                  </span>
-                  <span>{option.product.name}</span>
-                  <small>{option.product.color} · {option.product.material ?? "소재 정보 없음"}</small>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <div className="ar-controls">
-        <button
-          className="button button-secondary"
-          type="button"
-          disabled={accessoryAssetState !== "ready"}
-          aria-pressed={isAccessoryVisible}
-          onClick={() => setIsAccessoryVisible((visible) => !visible)}
-        >
-          {isAccessoryVisible ? "ACCESSORY 숨기기" : "ACCESSORY 표시하기"}
-        </button>
-        {canStart && (
-          <button
-            className="button button-primary"
-            type="button"
-            disabled={!bagAsset && !apparelAsset && !accessoryAsset}
-            onClick={() => void startCamera()}
-          >
-            카메라 시작
-          </button>
-        )}
-        {!canStart && (
-          <button
-            className="button button-primary"
-            type="button"
-            disabled={!canCapture || !isCaptureReady || isCapturing}
-            onClick={() => void capturePhoto()}
-          >
-            {isCapturing ? "촬영 이미지 준비 중" : "촬영"}
-          </button>
-        )}
-        <button
-          className="button button-secondary"
-          type="button"
-          disabled={bagAssetState !== "ready"}
-          aria-pressed={isBagVisible}
-          onClick={() => setIsBagVisible((visible) => !visible)}
-        >
-          {isBagVisible ? "가방 숨기기" : "가방 표시하기"}
-        </button>
-        <button
-          className="button button-secondary"
-          type="button"
-          disabled={apparelAssetState !== "ready"}
-          aria-pressed={isApparelVisible}
-          onClick={() => setIsApparelVisible((visible) => !visible)}
-        >
-          {isApparelVisible ? "APPAREL 숨기기" : "APPAREL 표시하기"}
-        </button>
-      </div>
-      {captureError && <p className="ar-capture-error" role="alert">{captureError}</p>}
-
-      {capturePreviewUrl && (
-        <section
-          className="ar-capture-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ar-capture-title"
-        >
-          <div className="ar-capture-preview">
-            <div className="ar-capture-copy">
-              <p className="eyebrow">AR CAPTURE</p>
-              <h2 id="ar-capture-title">촬영 미리보기</h2>
-              <p>현재 선택한 APPAREL, BAG, ACCESSORY가 함께 저장됩니다.</p>
+            <div className="ar-stage-messages">
+              {bagAssetState === "missing" && (
+                <div className="ar-asset-warning" role="alert">
+                  <strong>BAG AR asset이 준비되지 않았습니다.</strong>
+                  <span>{bagAsset?.path ?? "이 제품에 연결된 AR asset 경로가 없습니다."}</span>
+                </div>
+              )}
+              {bagAssetState === "loading" && bagAsset && <p className="ar-asset-loading" role="status">BAG overlay를 준비하고 있어요.</p>}
+              {apparelAssetState === "missing" && (
+                <div className="ar-asset-warning" role="alert">
+                  <strong>APPAREL AR asset이 준비되지 않았습니다.</strong>
+                  <span>{apparelAsset?.path ?? "이 제품에 연결된 AR asset 경로가 없습니다."}</span>
+                </div>
+              )}
+              {apparelAssetState === "loading" && apparelAsset && <p className="ar-asset-loading" role="status">APPAREL overlay를 준비하고 있어요.</p>}
+              {accessoryAssetState === "missing" && (
+                <div className="ar-asset-warning" role="alert">
+                  <strong>ACCESSORY AR 이미지가 준비되지 않았습니다.</strong>
+                  <span>{accessoryAsset?.path ?? "이 제품에 연결된 AR asset 경로가 없습니다."}</span>
+                </div>
+              )}
+              {accessoryAssetState === "loading" && accessoryAsset && <p className="ar-asset-loading" role="status">ACCESSORY overlay를 준비하고 있어요.</p>}
+              {captureError && <p className="ar-capture-error" role="alert">{captureError}</p>}
             </div>
-            <img src={capturePreviewUrl} alt="현재 AR 착용 화면 촬영 미리보기" />
-            <div className="ar-capture-actions">
-              <button className="button button-secondary" type="button" onClick={clearCapturedPhoto}>
-                다시 찍기
-              </button>
-              <a
-                className="button button-primary"
-                href={capturePreviewUrl}
-                download="mcm-journey-ar.png"
-              >
-                이미지 저장
-              </a>
-            </div>
+
+            <p className="ar-privacy-note">카메라 영상과 자세 정보는 브라우저 안에서만 처리하며 저장하지 않습니다.</p>
           </div>
-        </section>
-      )}
-      <p className="ar-privacy-note">카메라 영상과 자세 정보는 브라우저 안에서만 처리하며 저장하지 않습니다.</p>
-    </AppLayout>
+
+          <aside className="ar-look-rail" aria-label="가상 피팅 상품과 비교 옵션">
+            <section className="ar-current-look" aria-labelledby="ar-current-look-title">
+              <div className="ar-section-heading">
+                <p className="ar-experience-eyebrow">CURRENT LOOK</p>
+                <h2 id="ar-current-look-title">지금 착용 중인 Journey</h2>
+              </div>
+              <ul className="ar-product-list" aria-label="현재 착용 제품">
+                <li className={!isBagVisible ? "is-hidden" : ""}>
+                  <ProductImage product={bagProduct} className="ar-current-media" alt="" />
+                  <span className="ar-current-copy"><strong>BAG</strong><span>{bagProduct.name}</span></span>
+                  <button type="button" disabled={bagAssetState !== "ready"} aria-pressed={isBagVisible} onClick={() => setIsBagVisible((visible) => !visible)}>
+                    {isBagVisible ? "가방 숨기기" : "가방 표시하기"}
+                  </button>
+                </li>
+                <li className={!isApparelVisible ? "is-hidden" : ""}>
+                  {apparelProduct
+                    ? <ProductImage product={apparelProduct} className="ar-current-media" alt="" />
+                    : <span className="ar-current-media" />}
+                  <span className="ar-current-copy"><strong>APPAREL</strong><span>{apparelProduct?.name ?? "선택된 APPAREL 없음"}</span></span>
+                  <button type="button" disabled={apparelAssetState !== "ready"} aria-pressed={isApparelVisible} onClick={() => setIsApparelVisible((visible) => !visible)}>
+                    {isApparelVisible ? "APPAREL 숨기기" : "APPAREL 표시하기"}
+                  </button>
+                </li>
+                <li className={!isAccessoryVisible ? "is-hidden" : ""}>
+                  {accessoryProduct
+                    ? <ProductImage product={accessoryProduct} className="ar-current-media" alt="" />
+                    : <span className="ar-current-media" />}
+                  <span className="ar-current-copy"><strong>ACCESSORY</strong><span>{accessoryProduct?.name ?? "선택된 ACCESSORY 없음"}</span></span>
+                  <button type="button" disabled={accessoryAssetState !== "ready"} aria-pressed={isAccessoryVisible} onClick={() => setIsAccessoryVisible((visible) => !visible)}>
+                    {isAccessoryVisible ? "ACCESSORY 숨기기" : "ACCESSORY 표시하기"}
+                  </button>
+                </li>
+              </ul>
+            </section>
+
+            <section className="ar-comparison" aria-labelledby="ar-comparison-title">
+              <div className="ar-comparison-header">
+                <div>
+                  <p className="ar-experience-eyebrow">COMPARE THE LOOK</p>
+                  <h2 id="ar-comparison-title">다른 제품도 착용해보세요</h2>
+                  <p>미리보기만 바뀌며 Journey의 선택은 유지됩니다.</p>
+                </div>
+                <button type="button" disabled={isOriginalPreview} onClick={restoreOriginalSelection}>원래 추천으로 돌아가기</button>
+              </div>
+
+              <div className="ar-comparison-tabs" role="tablist" aria-label="AR 제품 카테고리">
+                {AR_COMPARISON_CATEGORIES.map((category) => (
+                  <button
+                    id={`ar-tab-${category.toLowerCase()}`}
+                    key={category}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeCategory === category}
+                    aria-controls="ar-comparison-panel"
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              <div id="ar-comparison-panel" className="ar-comparison-grid" role="tabpanel" aria-labelledby={`ar-tab-${activeCategory.toLowerCase()}`}>
+                {comparisonOptions[activeCategory].map((option) => {
+                  const isActive = previewSelection[activeCategory] === option.product.id;
+                  return (
+                    <button
+                      className={`ar-comparison-card${isActive ? " is-active" : ""}`}
+                      key={option.product.id}
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => previewProduct(activeCategory, option.product.id)}
+                    >
+                      <ProductImage
+                        product={option.product}
+                        className="ar-comparison-media"
+                        alt=""
+                      />
+                      <span className="ar-comparison-copy">
+                        <span className="ar-comparison-badges">
+                          {option.isAiPick && <strong>AI Pick</strong>}
+                          {isActive && <em>현재 착용</em>}
+                        </span>
+                        <span>{option.product.name}</span>
+                        <small>{option.product.color} · {option.product.material ?? "소재 정보 없음"}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        {capturePreviewUrl && (
+          <section className="ar-capture-backdrop" role="dialog" aria-modal="true" aria-labelledby="ar-capture-title">
+            <div className="ar-capture-preview">
+              <div className="ar-capture-copy">
+                <p className="ar-experience-eyebrow">AR CAPTURE</p>
+                <h2 id="ar-capture-title">촬영 미리보기</h2>
+                <p>현재 선택한 APPAREL, BAG, ACCESSORY가 함께 저장됩니다.</p>
+              </div>
+              <img src={capturePreviewUrl} alt="현재 AR 착용 화면 촬영 미리보기" />
+              <div className="ar-capture-actions">
+                <button type="button" onClick={clearCapturedPhoto}>다시 찍기</button>
+                <a href={capturePreviewUrl} download="mcm-journey-ar.png">이미지 저장</a>
+              </div>
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
   );
 }

@@ -1,5 +1,7 @@
 import type { InteractionType, StepRecommendationView } from "@mcm/shared";
 
+import { ProductImage } from "./ProductImage";
+
 const TYPE_LABEL = {
   MATCH: "추천",
   COMPARE: "비교",
@@ -36,17 +38,7 @@ export function ProductRecommendationCard({
         disabled={disabled || pending || selected || rejected}
         onClick={() => onInteraction("SELECTED")}
       >
-        <span className="product-media">
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            onError={(event) => {
-              event.currentTarget.hidden = true;
-              event.currentTarget.parentElement?.classList.add("image-unavailable");
-            }}
-          />
-          <span className="image-fallback" aria-hidden="true">MCM</span>
-        </span>
+        <ProductImage product={product} className="product-media" alt={product.name} />
         <span className="product-card-copy">
           <span className={`recommendation-badge recommendation-${recommendation.type.toLowerCase()}`}>
             {TYPE_LABEL[recommendation.type]}

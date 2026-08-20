@@ -8,7 +8,30 @@ describe("BAG AR asset mapping", () => {
     expect(asset?.path).toBe("/assets/ar/bag/demo-urban-carry-backpack.webp");
     expect(asset?.anchor).toBe("UPPER_TORSO");
     expect(asset?.scaleMultiplier).toBe(1.10);
-    expect(REQUIRED_BAG_AR_ASSET_PATHS).toHaveLength(3);
+    expect(REQUIRED_BAG_AR_ASSET_PATHS).toHaveLength(17);
+  });
+
+  it("maps all fourteen collection BAG SKUs to distinct product assets and calibration", () => {
+    const assets = Array.from({ length: 14 }, (_, index) => {
+      const sku = `MCM-BAG-${String(index + 1).padStart(3, "0")}`;
+      return getBagArAsset({ id: sku, sku, category: "BAG" });
+    });
+
+    expect(assets.every((asset) => (
+      asset !== null
+      && asset.path.startsWith("/assets/products/mcm-collection/bag/")
+      && asset.scaleMultiplier > 0
+      && Number.isFinite(asset.offsetX)
+      && Number.isFinite(asset.offsetY)
+    ))).toBe(true);
+    expect(new Set(assets.map((asset) => asset?.path))).toHaveLength(14);
+    expect(assets[1]?.anchor).toBe("UPPER_TORSO");
+    expect(assets[9]?.anchor).toBe("CROSSBODY");
+  });
+
+  it("never exposes a SHOES product through the BAG resolver", () => {
+    expect(getBagArAsset({ id: "shoe-1", sku: "MCM-SHOES-001", category: "SHOES" }))
+      .toBeNull();
   });
 
   it("does not map non-BAG products", () => {
