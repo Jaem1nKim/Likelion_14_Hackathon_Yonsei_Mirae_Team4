@@ -42,6 +42,21 @@ describe("Journey BAG, APPAREL, and ACCESSORY AR fitting", () => {
     expect(within(currentProducts).getByText(journeyResult.items[2]!.product.name)).toBeInTheDocument();
   });
 
+  it("renders AR controls in the mobile action order", async () => {
+    renderAr();
+    const startButton = await screen.findByRole("button", { name: "카메라 시작" });
+    const controls = startButton.parentElement;
+    if (!controls) throw new Error("AR controls were not rendered");
+    expect(controls).toHaveClass("ar-controls");
+
+    expect(within(controls).getAllByRole("button").map((button) => button.textContent)).toEqual([
+      "카메라 시작",
+      "ACCESSORY 숨기기",
+      "가방 숨기기",
+      "APPAREL 숨기기",
+    ]);
+  });
+
   it("shows three server-provided candidates in each comparison tab", async () => {
     renderAr();
     const panel = await screen.findByRole("tabpanel");
@@ -54,6 +69,45 @@ describe("Journey BAG, APPAREL, and ACCESSORY AR fitting", () => {
     await userEvent.click(screen.getByRole("tab", { name: "ACCESSORY" }));
     expect(within(panel).getAllByRole("button")).toHaveLength(3);
     expect(within(panel).getByText("MCM Silk Visetos Scarf - Brown")).toBeInTheDocument();
+  });
+
+  it("uses registered WebP assets for legacy seed images in every comparison tab", async () => {
+    const result = structuredClone(journeyResult);
+    const aggregate = structuredClone(journeyAggregate("FINISHED"));
+    result.items.forEach((item) => {
+      item.product.imageUrl = `/assets/demo/products/${item.product.sku.toLowerCase()}.png`;
+    });
+    aggregate.completedSteps.forEach((step) => {
+      step.recommendations.forEach((recommendation) => {
+        recommendation.product.imageUrl = `/assets/demo/products/${recommendation.product.sku.toLowerCase()}.png`;
+      });
+    });
+
+    renderAr(result, aggregate);
+    const panel = await screen.findByRole("tabpanel");
+    const imageSources = () => [...panel.querySelectorAll("img")]
+      .map((image) => image.getAttribute("src"))
+      .sort();
+
+    expect(imageSources()).toEqual([
+      "/assets/ar/bag/demo-classic-boston-bag.webp",
+      "/assets/ar/bag/demo-signal-mini-crossbody.webp",
+      "/assets/ar/bag/demo-urban-carry-backpack.webp",
+    ]);
+    expect(within(panel).queryByText("MCM")).not.toBeInTheDocument();
+    expect(within(panel).queryByText("이미지 준비 중")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("tab", { name: "APPAREL" }));
+    expect(imageSources()).toEqual([
+      "/assets/ar/apparel/demo-blouson-leather-jacket.webp",
+      "/assets/ar/apparel/demo-essential-logo-patch-varsity-jacket.webp",
+      "/assets/ar/apparel/demo-monogram-backpack-vest.webp",
+    ]);
+    await userEvent.click(screen.getByRole("tab", { name: "ACCESSORY" }));
+    expect(imageSources()).toEqual([
+      "/assets/ar/accessory/demo-aren-rabbit-2d-charm-pink.webp",
+      "/assets/ar/accessory/demo-m-art-reversible-belt-grey.webp",
+      "/assets/ar/accessory/demo-silk-visetos-scarf-brown.webp",
+    ]);
   });
 
   it("switches BAG, APPAREL, and ACCESSORY overlays without changing the Journey", async () => {

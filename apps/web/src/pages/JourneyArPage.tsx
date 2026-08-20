@@ -8,6 +8,7 @@ import { getJourneyResult } from "../api/result-api";
 import { AppLayout } from "../components/AppLayout";
 import { ErrorState } from "../components/ErrorState";
 import { LoadingState } from "../components/LoadingState";
+import { ProductImage } from "../features/product-selection/ProductImage";
 import { getAccessoryArAsset } from "../features/ar/accessory-ar-assets";
 import {
   calculateAccessoryOverlay,
@@ -673,9 +674,11 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
                 aria-pressed={isActive}
                 onClick={() => previewProduct(activeCategory, option.product.id)}
               >
-                <span className="ar-comparison-media">
-                  <img src={option.product.imageUrl} alt="" />
-                </span>
+                <ProductImage
+                  product={option.product}
+                  className="ar-comparison-media"
+                  alt=""
+                />
                 <span className="ar-comparison-copy">
                   <span className="ar-comparison-badges">
                     {option.isAiPick && <strong>AI Pick</strong>}
@@ -691,15 +694,6 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
       </section>
 
       <div className="ar-controls">
-        <button
-          className="button button-secondary"
-          type="button"
-          disabled={accessoryAssetState !== "ready"}
-          aria-pressed={isAccessoryVisible}
-          onClick={() => setIsAccessoryVisible((visible) => !visible)}
-        >
-          {isAccessoryVisible ? "ACCESSORY 숨기기" : "ACCESSORY 표시하기"}
-        </button>
         {canStart && (
           <button
             className="button button-primary"
@@ -720,6 +714,15 @@ export function JourneyArPage({ runtime = browserArRuntime }: JourneyArPageProps
             {isCapturing ? "촬영 이미지 준비 중" : "촬영"}
           </button>
         )}
+        <button
+          className="button button-secondary"
+          type="button"
+          disabled={accessoryAssetState !== "ready"}
+          aria-pressed={isAccessoryVisible}
+          onClick={() => setIsAccessoryVisible((visible) => !visible)}
+        >
+          {isAccessoryVisible ? "ACCESSORY 숨기기" : "ACCESSORY 표시하기"}
+        </button>
         <button
           className="button button-secondary"
           type="button"

@@ -65,11 +65,39 @@ describe("Journey product selection", () => {
   });
 
   it("provides image alt text and a local fallback", async () => {
-    mockFetchQueue(...authenticatedResponses(success(journeyAggregate("BAG"))));
+    const aggregate = journeyAggregate("BAG");
+    mockFetchQueue(...authenticatedResponses(success(aggregate)));
     renderApp("/journey/journey-1/select");
     const image = await screen.findByAltText("Demo Visetos Carry Bag");
+    expect(image).toHaveAttribute("src", "/assets/ar/bag/demo-urban-carry-backpack.webp");
+    expect(document.querySelector(".product-media .image-fallback")).toBeNull();
     fireEvent.error(image);
-    expect(image.parentElement).toHaveClass("image-unavailable");
+    await waitFor(() => {
+      expect(screen.getByAltText("Demo Visetos Carry Bag")).toHaveAttribute(
+        "src",
+        "/images/product-bag-1.jpg",
+      );
+    });
+    fireEvent.error(screen.getByAltText("Demo Visetos Carry Bag"));
+    expect(screen.getByRole("img", { name: "Demo Visetos Carry Bag 이미지 준비 중" })).toBeInTheDocument();
+  });
+
+  it.each([
+    ["BAG", "/assets/demo/products/demo-bag-001.png", "/assets/ar/bag/demo-urban-carry-backpack.webp"],
+    ["APPAREL", "/assets/demo/products/demo-app-001.png", "/assets/ar/apparel/demo-monogram-backpack-vest.webp"],
+    ["ACCESSORY", "/assets/demo/products/demo-acc-001.png", "/assets/ar/accessory/demo-m-art-reversible-belt-grey.webp"],
+  ] as const)("uses an existing registered asset for %s without requesting the missing seed PNG", async (
+    stage,
+    missingSeedImage,
+    expectedAsset,
+  ) => {
+    const aggregate = journeyAggregate(stage);
+    const product = aggregate.currentStep!.recommendations[0]!.product;
+    product.imageUrl = missingSeedImage;
+    mockFetchQueue(...authenticatedResponses(success(aggregate)));
+    renderApp("/journey/journey-1/select");
+    expect(await screen.findByAltText(product.name)).toHaveAttribute("src", expectedAsset);
+    expect(screen.queryByRole("img", { name: `${product.name} 이미지 준비 중` })).not.toBeInTheDocument();
   });
 
   it("shows category, color, material and size", async () => {
