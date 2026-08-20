@@ -132,13 +132,13 @@ describe("Journey Passport", () => {
 
   it("offers profile, new reservation and logout commands", async () => {
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(reservation), success([customer])));
+    mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
     expect(await screen.findByRole("button", { name: "프로필로 돌아가기" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "새 예약 만들기" })).toBeInTheDocument();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "로그아웃" }));
-    expect(await screen.findByText("오늘의 프로필을 선택하세요")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Where will your choicetake you/ })).toBeInTheDocument();
   });
 
   it("renders the same semantic structure at a mobile viewport", async () => {

@@ -56,6 +56,59 @@
   opacity: 0.65;
 }
 
+.customer-header .introduction-header__nav {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.customer-header .introduction-header__nav::-webkit-scrollbar {
+  display: none;
+}
+
+.customer-header .introduction-header__nav a,
+.customer-header .introduction-header__nav button {
+  position: relative;
+  min-height: 32px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: rgba(255, 255, 255, 0.78);
+  background: transparent;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: 32px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.customer-header .introduction-header__nav a::after,
+.customer-header .introduction-header__nav button::after {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  left: 0;
+  height: 1px;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 160ms ease;
+  content: "";
+}
+
+.customer-header .introduction-header__nav a:hover,
+.customer-header .introduction-header__nav button:hover:not(:disabled),
+.customer-header .introduction-header__nav .is-active {
+  color: #ffffff;
+}
+
+.customer-header .introduction-header__nav a:hover::after,
+.customer-header .introduction-header__nav button:hover:not(:disabled)::after,
+.customer-header .introduction-header__nav .is-active::after {
+  transform: scaleX(1);
+}
+
 .service-introduction {
   overflow: hidden;
   background: #ffffff;
@@ -339,8 +392,8 @@
   }
 
   .introduction-header__nav {
-    gap: 18px;
-    font-size: 13px;
+    gap: 12px;
+    font-size: 11px;
   }
 
   .introduction-header__nav span {
@@ -422,5 +475,17 @@
   .journey-introduction__card img {
     height: auto;
     aspect-ratio: 360 / 183;
+  }
+}
+
+@media (max-width: 420px) {
+  .customer-header {
+    gap: 14px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .customer-header .introduction-header__nav {
+    gap: 10px;
   }
 }

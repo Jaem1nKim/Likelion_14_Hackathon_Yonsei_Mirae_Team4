@@ -26,7 +26,7 @@ describe("consent page", () => {
 
     expect(await screen.findByText(/예약 정보가 없어/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "예약하기" })).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
   });
 
   it("loads and displays current consent values", async () => {
@@ -185,10 +185,10 @@ describe("profile page", () => {
   it("logs out from the profile page", async () => {
     const user = userEvent.setup();
     authenticate();
-    mockFetchQueue(...authenticatedResponses(success(profile), success([customer])));
+    mockFetchQueue(...authenticatedResponses(success(profile)));
     renderApp("/profile");
     await user.click(await screen.findByRole("button", { name: "로그아웃" }));
-    expect(await screen.findByText("오늘의 프로필을 선택하세요")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Where will your choicetake you/ })).toBeInTheDocument();
     await waitFor(() => expect(localStorage.length).toBe(0));
   });
 });

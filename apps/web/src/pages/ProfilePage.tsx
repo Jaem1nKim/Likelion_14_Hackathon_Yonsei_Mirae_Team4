@@ -29,7 +29,7 @@ const SCORE_LABELS = [
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const { user, logout } = useDemoUser();
+  const { user } = useDemoUser();
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -140,17 +140,7 @@ export function ProfilePage() {
             </div>
           </section>
 
-          <div className="page-actions page-actions-split">
-            <button
-              className="button button-secondary"
-              type="button"
-              onClick={() => {
-                logout();
-                navigate("/login", { replace: true });
-              }}
-            >
-              로그아웃
-            </button>
+          <div className="page-actions">
             <PrimaryButton type="button" onClick={() => navigate("/reserve")}>
               매장 방문 예약하기
             </PrimaryButton>

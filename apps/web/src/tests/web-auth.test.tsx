@@ -10,6 +10,7 @@ import {
   customer,
   secondCustomer,
   staff,
+  store,
   success,
 } from "./fixtures";
 import { mockFetchQueue, renderApp } from "./test-utils";
@@ -55,6 +56,16 @@ describe("customer login", () => {
     await user.click(await screen.findByRole("button", { name: /Stable Explorer/ }));
     await user.click(screen.getByRole("button", { name: "이 프로필로 시작하기" }));
     expect(await screen.findByText("온라인 관심 정보 활용 동의")).toBeInTheDocument();
+  });
+
+  it("continues a reservation-start login directly to reserve", async () => {
+    const user = userEvent.setup();
+    mockFetchQueue(success([customer]), success(customer), success([store]));
+    renderApp("/login", { from: "/reserve" });
+    expect(await screen.findByText(/예약 Journey를 이어서 시작합니다/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Stable Explorer/ }));
+    await user.click(screen.getByRole("button", { name: "이 프로필로 시작하기" }));
+    expect(await screen.findByRole("heading", { name: "체험 매장 선택" })).toBeInTheDocument();
   });
 
   it("stores only the selected user id in localStorage", async () => {

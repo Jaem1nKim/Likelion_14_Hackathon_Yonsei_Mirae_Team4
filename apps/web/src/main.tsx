@@ -19,6 +19,7 @@ import "./styles/journey-select.css";
 import "./styles/journey-result.css";
 import "./styles/shared-result.css";
 import "./styles/ar-experience.css";
+import "./styles/login-experience.css";
 
 const rootElement = document.getElementById("root");
 

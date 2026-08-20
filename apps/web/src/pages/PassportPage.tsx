@@ -54,7 +54,7 @@ function formatDateTime(value: string) {
 export function PassportPage() {
   const navigate = useNavigate();
   const { reservationId } = useParams();
-  const { user, logout } = useDemoUser();
+  const { user } = useDemoUser();
   const { clearDraft } = useReservationDraft();
   const [reservation, setReservation] = useState<ReservationView | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -190,17 +190,6 @@ export function PassportPage() {
                 onClick={() => navigate("/profile")}
               >
                 프로필로 돌아가기
-              </button>
-              <button
-                className="passport-figma-button passport-figma-button--text"
-                type="button"
-                onClick={() => {
-                  clearDraft();
-                  logout();
-                  navigate("/login", { replace: true });
-                }}
-              >
-                로그아웃
               </button>
             </div>
           </>
