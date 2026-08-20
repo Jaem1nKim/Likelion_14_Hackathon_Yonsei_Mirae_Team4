@@ -21,6 +21,7 @@ import {
 } from "../features/journey/journey-navigation";
 import { useJourneyAggregate } from "../features/journey/use-journey-aggregate";
 import { ProductRecommendationCard } from "../features/product-selection/ProductRecommendationCard";
+import { ProductImage } from "../features/product-selection/ProductImage";
 import { createUuidV4 } from "../utils/uuid";
 
 const STAGE_LABEL = { BAG: "BAG", APPAREL: "APPAREL", ACCESSORY: "ACCESSORY" } as const;
@@ -357,20 +358,17 @@ export function JourneyPage({ view }: Props) {
                           <span>{String(item.number).padStart(2, "0")}</span>
                           <small>{statusLabel}</small>
                         </div>
-                        <div className="journey-support-timeline__media">
-                          {selectedProduct ? (
-                            <>
-                              <img
-                                src={selectedProduct.imageUrl}
-                                alt={selectedProduct.name}
-                                onError={(event) => event.currentTarget.parentElement?.classList.add("is-unavailable")}
-                              />
-                              <span aria-hidden="true">MCM</span>
-                            </>
-                          ) : (
+                        {selectedProduct ? (
+                          <ProductImage
+                            product={selectedProduct}
+                            className="journey-support-timeline__media"
+                            alt={selectedProduct.name}
+                          />
+                        ) : (
+                          <div className="journey-support-timeline__media">
                             <span aria-hidden="true">{item.stage}</span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         <div className="journey-support-timeline__copy">
                           <p>{item.stage}</p>
                           <h2>{selectedProduct?.name ?? (item.status === "upcoming" ? "아직 시작 전" : "선택 진행 중")}</h2>

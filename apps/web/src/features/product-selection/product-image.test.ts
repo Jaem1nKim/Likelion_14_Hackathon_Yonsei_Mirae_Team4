@@ -53,4 +53,27 @@ describe("Figma product card image sources", () => {
       imageUrl: null,
     })).toEqual([]);
   });
+
+  it.each([
+    ["MCM-BAG-001", "BAG", "/assets/products/mcm-collection/bag/travia-crushed-leather-quilted-shoulder-bag-black.webp"],
+    ["MCM-APP-001", "APPAREL", "/assets/products/mcm-collection/apparel/monogram-denim-jacquard-jacket-denim-blue.webp"],
+    ["MCM-ACC-001", "ACCESSORY", "/assets/products/mcm-collection/accessory/laurel-geometric-sunglasses.webp"],
+  ] as const)("reuses the registered collection asset for %s", (sku, category, path) => {
+    expect(getProductImageSources({
+      id: sku,
+      sku,
+      category,
+      imageUrl: path,
+    })).toEqual([path]);
+  });
+
+  it("does not register the collection SHOES assets for AR precedence", () => {
+    const path = "/assets/products/mcm-collection/shoes/example.webp";
+    expect(getProductImageSources({
+      id: "MCM-SHOES-001",
+      sku: "MCM-SHOES-001",
+      category: "SHOES",
+      imageUrl: path,
+    })).toEqual([path]);
+  });
 });

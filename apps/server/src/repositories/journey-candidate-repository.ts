@@ -1,6 +1,7 @@
 import type { ProductCategory } from "@mcm/shared";
 
 import type { Prisma } from "../generated/prisma/client.js";
+import { isSupportedJourneyStage } from "../constants/journey.js";
 import { prisma } from "../lib/prisma.js";
 
 const candidateSelect = {
@@ -42,6 +43,10 @@ export async function findJourneyCandidates(input: {
   stage: ProductCategory;
   excludedProductIds: string[];
 }) {
+  if (!isSupportedJourneyStage(input.stage)) {
+    return [];
+  }
+
   const inventories = await prisma.inventory.findMany({
     where: {
       storeId: input.storeId,

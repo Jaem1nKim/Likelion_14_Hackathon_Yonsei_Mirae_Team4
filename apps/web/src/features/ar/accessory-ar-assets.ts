@@ -1,4 +1,5 @@
 import type { ProductView } from "@mcm/shared";
+import { PRODUCT_AR_ASSET_PATHS_BY_SKU } from "@mcm/shared";
 
 import type { AccessoryOverlayConfig } from "./accessory-pose";
 
@@ -6,9 +7,25 @@ export type AccessoryArAsset = AccessoryOverlayConfig & {
   path: string;
 };
 
+function collectionGlasses(
+  sku: keyof typeof PRODUCT_AR_ASSET_PATHS_BY_SKU,
+  scaleMultiplier: number,
+  offsetY: number,
+): AccessoryArAsset {
+  return {
+    path: PRODUCT_AR_ASSET_PATHS_BY_SKU[sku],
+    anchor: "GLASSES",
+    aspectRatio: 2.35,
+    scaleMultiplier,
+    offsetX: 0,
+    offsetY,
+    rotationOffset: 0,
+  };
+}
+
 const ACCESSORY_ASSETS_BY_SKU: Readonly<Record<string, AccessoryArAsset>> = {
   "DEMO-ACC-001": {
-    path: "/assets/ar/accessory/demo-m-art-reversible-belt-grey.webp",
+    path: PRODUCT_AR_ASSET_PATHS_BY_SKU["DEMO-ACC-001"],
     anchor: "WAIST",
     aspectRatio: 4.4,
     scaleMultiplier: 1,
@@ -17,7 +34,7 @@ const ACCESSORY_ASSETS_BY_SKU: Readonly<Record<string, AccessoryArAsset>> = {
     rotationOffset: 0,
   },
   "DEMO-ACC-002": {
-    path: "/assets/ar/accessory/demo-silk-visetos-scarf-brown.webp",
+    path: PRODUCT_AR_ASSET_PATHS_BY_SKU["DEMO-ACC-002"],
     anchor: "NECK",
     aspectRatio: 1,
     scaleMultiplier: 0.88,
@@ -26,7 +43,7 @@ const ACCESSORY_ASSETS_BY_SKU: Readonly<Record<string, AccessoryArAsset>> = {
     rotationOffset: 0,
   },
   "DEMO-ACC-003": {
-    path: "/assets/ar/accessory/demo-aren-rabbit-2d-charm-pink.webp",
+    path: PRODUCT_AR_ASSET_PATHS_BY_SKU["DEMO-ACC-003"],
     anchor: "BAG_ATTACHED",
     aspectRatio: 0.3,
     scaleMultiplier: 0.92,
@@ -34,6 +51,10 @@ const ACCESSORY_ASSETS_BY_SKU: Readonly<Record<string, AccessoryArAsset>> = {
     offsetY: 0.02,
     rotationOffset: 0.08,
   },
+  "MCM-ACC-001": collectionGlasses("MCM-ACC-001", 1, 0.03),
+  "MCM-ACC-002": collectionGlasses("MCM-ACC-002", 0.98, 0.03),
+  "MCM-ACC-003": collectionGlasses("MCM-ACC-003", 0.94, 0.035),
+  "MCM-ACC-004": collectionGlasses("MCM-ACC-004", 1.08, 0.035),
 };
 
 const ACCESSORY_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, AccessoryArAsset>> = {

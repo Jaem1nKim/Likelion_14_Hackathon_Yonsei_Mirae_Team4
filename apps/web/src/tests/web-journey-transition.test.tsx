@@ -136,6 +136,21 @@ describe("Journey transitions and recovery", () => {
     expect(screen.getByText("Monogram Backpack Vest")).toBeInTheDocument();
   });
 
+  it("uses registered product WebPs for completed and current progress cards", async () => {
+    mockFetchQueue(...authenticatedResponses(success(journeyAggregate("ACCESSORY", true))));
+    renderApp("/journey/journey-1/progress");
+
+    const expectedImages = [
+      ["Demo Visetos Carry Bag", "/assets/ar/bag/demo-urban-carry-backpack.webp"],
+      ["Monogram Backpack Vest", "/assets/ar/apparel/demo-monogram-backpack-vest.webp"],
+      ["Adjustable M-Art Reversible Belt 1.5” in Lauretos Grey", "/assets/ar/accessory/demo-m-art-reversible-belt-grey.webp"],
+    ] as const;
+
+    for (const [name, source] of expectedImages) {
+      expect(await screen.findByAltText(name)).toHaveAttribute("src", source);
+    }
+  });
+
   it("keeps FINISHED users out of selection", async () => {
     mockFetchQueue(...authenticatedResponses(success(journeyAggregate("FINISHED")), success(journeyResult)));
     renderApp("/journey/journey-1/select");

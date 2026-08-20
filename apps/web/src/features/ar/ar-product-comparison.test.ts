@@ -48,4 +48,26 @@ describe("AR product comparison", () => {
     expect(isOriginalArSelection(preview, original)).toBe(false);
     expect(isOriginalArSelection(original, original)).toBe(true);
   });
+
+  it("keeps a newly registered collection recommendation available for AR preview", () => {
+    const aggregate = journeyAggregate("FINISHED");
+    const bagStep = aggregate.completedSteps.find((step) => step.stage === "BAG")!;
+    bagStep.recommendations[1] = {
+      ...bagStep.recommendations[1]!,
+      product: {
+        ...bagStep.recommendations[1]!.product,
+        id: "41000000-0000-4000-8000-000000000002",
+        sku: "MCM-BAG-002",
+        name: "Aren 노바 모노그램 ECONYL® 백팩",
+        imageUrl: "/assets/products/mcm-collection/bag/aren-nova-monogram-econyl-backpack-black.webp",
+      },
+    };
+
+    const options = buildArComparisonOptions(aggregate, journeyResult);
+    const preview = { ...createOriginalArSelection(journeyResult), BAG: bagStep.recommendations[1]!.product.id };
+
+    expect(options.BAG.some((option) => option.product.sku === "MCM-BAG-002")).toBe(true);
+    expect(resolveArPreviewProduct(options, preview, "BAG")?.sku).toBe("MCM-BAG-002");
+    expect(options).not.toHaveProperty("SHOES");
+  });
 });

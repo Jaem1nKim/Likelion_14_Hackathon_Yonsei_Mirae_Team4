@@ -9,3 +9,4 @@ export {
 export type { HealthData, HealthResponse } from "./health.js";
 export * from "./journey-types.js";
 export * from "./journey-route.js";
+export * from "./product-assets.js";

@@ -18,7 +18,27 @@ describe("APPAREL AR asset mapping", () => {
   });
 
   it("lists all required APPAREL assets", () => {
-    expect(REQUIRED_APPAREL_AR_ASSET_PATHS).toHaveLength(3);
+    expect(REQUIRED_APPAREL_AR_ASSET_PATHS).toHaveLength(12);
+  });
+
+  it("maps all nine collection APPAREL SKUs with independent calibration", () => {
+    const assets = Array.from({ length: 9 }, (_, index) => {
+      const sku = `MCM-APP-${String(index + 1).padStart(3, "0")}`;
+      return getApparelArAsset({ id: sku, sku, category: "APPAREL" });
+    });
+
+    expect(assets.every((asset) => (
+      asset !== null
+      && asset.path.startsWith("/assets/products/mcm-collection/apparel/")
+      && asset.scaleMultiplier > 0
+      && Number.isFinite(asset.offsetY)
+    ))).toBe(true);
+    expect(new Set(assets.map((asset) => asset?.path))).toHaveLength(9);
+  });
+
+  it("never exposes a SHOES product through the APPAREL resolver", () => {
+    expect(getApparelArAsset({ id: "shoe-1", sku: "MCM-SHOES-001", category: "SHOES" }))
+      .toBeNull();
   });
 
   it("does not map a non-APPAREL product", () => {

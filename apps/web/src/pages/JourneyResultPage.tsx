@@ -79,6 +79,7 @@ export function JourneyResultPage() {
             <h2 id="selected-items-title" className="journey-result-visually-hidden">Journey에서 선택한 상품</h2>
             <ResultProductGrid items={result.items.map((item) => ({
               productId: item.product.id,
+              sku: item.product.sku,
               name: item.product.name,
               category: item.category,
               color: item.product.color,
