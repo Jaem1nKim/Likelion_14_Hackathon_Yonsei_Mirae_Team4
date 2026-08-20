@@ -36,7 +36,11 @@ const BAG_ASSETS_BY_SKU: Readonly<Record<string, BagArAsset>> = {
   },
 };
 
-const BAG_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, BagArAsset>> = {};
+const BAG_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, BagArAsset>> = {
+  "40000000-0000-4000-8000-000000000001": BAG_ASSETS_BY_SKU["DEMO-BAG-001"]!,
+  "40000000-0000-4000-8000-000000000002": BAG_ASSETS_BY_SKU["DEMO-BAG-002"]!,
+  "40000000-0000-4000-8000-000000000003": BAG_ASSETS_BY_SKU["DEMO-BAG-003"]!,
+};
 
 export function getBagArAsset(
   product: Pick<ProductView, "id" | "sku" | "category">,

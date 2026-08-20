@@ -78,8 +78,45 @@ describe("Journey product selection", () => {
     mockFetchQueue(...authenticatedResponses(success(journeyAggregate("BAG"))));
     renderApp("/journey/journey-1/select");
     const image = await screen.findByAltText("Demo Visetos Carry Bag");
+    expect(image).toHaveAttribute("src", "/assets/ar/bag/demo-urban-carry-backpack.webp");
+    expect(document.querySelector(".product-media .image-fallback")).toBeNull();
     fireEvent.error(image);
-    expect(image.parentElement).toHaveClass("image-unavailable");
+    await waitFor(() => {
+      expect(screen.getByAltText("Demo Visetos Carry Bag")).toHaveAttribute(
+        "src",
+        "/images/product-bag-1.jpg",
+      );
+    });
+    fireEvent.error(screen.getByAltText("Demo Visetos Carry Bag"));
+    expect(screen.getByRole("img", {
+      name: "Demo Visetos Carry Bag 이미지 준비 중",
+    })).toBeInTheDocument();
+  });
+
+  it.each([
+    ["BAG", [
+      "/assets/ar/bag/demo-urban-carry-backpack.webp",
+      "/assets/ar/bag/demo-classic-boston-bag.webp",
+      "/assets/ar/bag/demo-signal-mini-crossbody.webp",
+    ]],
+    ["APPAREL", [
+      "/assets/ar/apparel/demo-monogram-backpack-vest.webp",
+      "/assets/ar/apparel/demo-blouson-leather-jacket.webp",
+      "/assets/ar/apparel/demo-essential-logo-patch-varsity-jacket.webp",
+    ]],
+    ["ACCESSORY", [
+      "/assets/ar/accessory/demo-m-art-reversible-belt-grey.webp",
+      "/assets/ar/accessory/demo-silk-visetos-scarf-brown.webp",
+      "/assets/ar/accessory/demo-aren-rabbit-2d-charm-pink.webp",
+    ]],
+  ] as const)("renders the three registered %s product images", async (stage, expectedSources) => {
+    mockFetchQueue(...authenticatedResponses(success(journeyAggregate(stage))));
+    renderApp("/journey/journey-1/select");
+    await screen.findAllByRole("article");
+
+    expect([...document.querySelectorAll<HTMLImageElement>(".product-media img")]
+      .map((image) => image.getAttribute("src"))).toEqual(expectedSources);
+    expect(document.querySelector(".product-media .image-fallback")).toBeNull();
   });
 
   it("shows category, color, material and size", async () => {

@@ -30,7 +30,11 @@ const APPAREL_ASSETS_BY_SKU: Readonly<Record<string, ApparelArAsset>> = {
   },
 };
 
-const APPAREL_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, ApparelArAsset>> = {};
+const APPAREL_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, ApparelArAsset>> = {
+  "40000000-0000-4000-8000-000000000004": APPAREL_ASSETS_BY_SKU["DEMO-APP-001"]!,
+  "40000000-0000-4000-8000-000000000005": APPAREL_ASSETS_BY_SKU["DEMO-APP-002"]!,
+  "40000000-0000-4000-8000-000000000006": APPAREL_ASSETS_BY_SKU["DEMO-APP-003"]!,
+};
 
 export function getApparelArAsset(
   product: Pick<ProductView, "id" | "sku" | "category">,

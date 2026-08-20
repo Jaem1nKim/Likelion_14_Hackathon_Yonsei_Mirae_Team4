@@ -36,7 +36,11 @@ const ACCESSORY_ASSETS_BY_SKU: Readonly<Record<string, AccessoryArAsset>> = {
   },
 };
 
-const ACCESSORY_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, AccessoryArAsset>> = {};
+const ACCESSORY_ASSETS_BY_PRODUCT_ID: Readonly<Record<string, AccessoryArAsset>> = {
+  "40000000-0000-4000-8000-000000000007": ACCESSORY_ASSETS_BY_SKU["DEMO-ACC-001"]!,
+  "40000000-0000-4000-8000-000000000008": ACCESSORY_ASSETS_BY_SKU["DEMO-ACC-002"]!,
+  "40000000-0000-4000-8000-000000000009": ACCESSORY_ASSETS_BY_SKU["DEMO-ACC-003"]!,
+};
 
 export function getAccessoryArAsset(
   product: Pick<ProductView, "id" | "sku" | "category">,
