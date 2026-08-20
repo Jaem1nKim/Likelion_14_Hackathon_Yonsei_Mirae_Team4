@@ -302,9 +302,14 @@ describe("Journey BAG, APPAREL, and ACCESSORY AR fitting", () => {
     });
     const getUserMedia = vi.spyOn(browserArRuntime, "getUserMedia").mockReturnValue(pending);
     renderAr();
+    const camera = await screen.findByLabelText("실시간 BAG, APPAREL, ACCESSORY 가상 피팅 화면");
+    expect(screen.getByText("카메라를 시작해 착용 위치를 확인해보세요.")).toBeInTheDocument();
+    expect(camera).not.toHaveClass("is-camera-active");
     const button = await screen.findByRole("button", { name: "카메라 시작" });
     await userEvent.click(button);
     expect(button).not.toBeInTheDocument();
+    expect(screen.queryByText("카메라를 시작해 착용 위치를 확인해보세요.")).not.toBeInTheDocument();
+    expect(camera).toHaveClass("is-camera-active");
     expect(getUserMedia).toHaveBeenCalledTimes(1);
     resolveStream({ getTracks: () => [] } as unknown as MediaStream);
     await waitFor(() => expect(getUserMedia).toHaveBeenCalledTimes(1));
