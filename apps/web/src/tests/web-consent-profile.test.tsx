@@ -8,6 +8,7 @@ import {
   consentMissing,
   customer,
   profile,
+  store,
   success,
 } from "./fixtures";
 import {
@@ -18,14 +19,24 @@ import {
 } from "./test-utils";
 
 describe("consent page", () => {
+  it("returns a reservation consent visit without a draft to reserve", async () => {
+    authenticate();
+    const fetchMock = mockFetchQueue(...authenticatedResponses(success([store])));
+    renderApp("/consent", { reservationFlow: true });
+
+    expect(await screen.findByText(/예약 정보가 없어/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "예약하기" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("loads and displays current consent values", async () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(consentAllowed)));
     renderApp("/consent");
     expect(
-      await screen.findByRole("checkbox", { name: /Journey 진행 및 선택 데이터 활용/ }),
+      await screen.findByRole("checkbox", { name: /Journey 진행 및 제품 선택 데이터 이용/ }),
     ).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: /온라인 취향 행동 데이터 활용/ })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /온라인 관심·행동 정보 활용/ })).toBeChecked();
   });
 
   it("keeps the continue button disabled without required consent", async () => {
@@ -33,7 +44,10 @@ describe("consent page", () => {
     mockFetchQueue(...authenticatedResponses(success(consentMissing)));
     renderApp("/consent");
     expect(
-      await screen.findByRole("button", { name: "동의하고 프로필 확인하기" }),
+      await screen.findByRole("button", { name: "필수 동의만 하고 계속" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "필수·선택 모두 동의하고 계속" }),
     ).toBeDisabled();
   });
 
@@ -45,15 +59,34 @@ describe("consent page", () => {
     );
     renderApp("/consent");
     await user.click(
-      await screen.findByRole("checkbox", { name: /Journey 진행 및 선택 데이터 활용/ }),
+      await screen.findByRole("checkbox", { name: /Journey 진행 및 제품 선택 데이터 이용/ }),
     );
-    await user.click(screen.getByRole("checkbox", { name: /온라인 취향 행동 데이터 활용/ }));
-    await user.click(screen.getByRole("button", { name: "동의하고 프로필 확인하기" }));
+    await user.click(screen.getByRole("checkbox", { name: /온라인 관심·행동 정보 활용/ }));
+    await user.click(screen.getByRole("button", { name: "필수·선택 모두 동의하고 계속" }));
     expect(await screen.findByText("나의 Journey Profile")).toBeInTheDocument();
     const request = fetchMock.mock.calls[2]?.[1] as RequestInit;
     expect(JSON.parse(String(request.body))).toEqual({
       journeyDataAllowed: true,
       behaviorDataAllowed: true,
+    });
+  });
+
+  it("saves only required consent when the optional action is chosen", async () => {
+    const user = userEvent.setup();
+    authenticate();
+    const fetchMock = mockFetchQueue(
+      ...authenticatedResponses(success(consentMissing), success(consentAllowed), success(profile)),
+    );
+    renderApp("/consent");
+    await user.click(
+      await screen.findByRole("checkbox", { name: /Journey 진행 및 제품 선택 데이터 이용/ }),
+    );
+    await user.click(screen.getByRole("button", { name: "필수 동의만 하고 계속" }));
+    expect(await screen.findByText("나의 Journey Profile")).toBeInTheDocument();
+    const request = fetchMock.mock.calls[2]?.[1] as RequestInit;
+    expect(JSON.parse(String(request.body))).toEqual({
+      journeyDataAllowed: true,
+      behaviorDataAllowed: false,
     });
   });
 
@@ -65,7 +98,7 @@ describe("consent page", () => {
     );
     renderApp("/consent");
     await user.click(
-      await screen.findByRole("button", { name: "동의하고 프로필 확인하기" }),
+      await screen.findByRole("button", { name: "필수·선택 모두 동의하고 계속" }),
     );
     expect(await screen.findByText("나의 Journey Profile")).toBeInTheDocument();
   });
@@ -83,10 +116,13 @@ describe("consent page", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
     renderApp("/consent");
-    const button = await screen.findByRole("button", { name: "동의하고 프로필 확인하기" });
+    const button = await screen.findByRole("button", {
+      name: "필수·선택 모두 동의하고 계속",
+    });
     await user.click(button);
-    expect(screen.getByRole("button", { name: "처리 중..." })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "처리 중..." }));
+    expect(button).toBeDisabled();
+    expect(screen.getByRole("button", { name: "필수 동의만 하고 계속" })).toBeDisabled();
+    await user.click(button);
     expect(fetchMock).toHaveBeenCalledTimes(3);
     resolvePut?.(success(consentAllowed));
   });

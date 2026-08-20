@@ -9,6 +9,15 @@ import "./styles/global.css";
 import "./styles/layout.css";
 import "./styles/components.css";
 import "./styles/pages.css";
+import "./styles/introduction.css";
+import "./styles/reserve.css";
+import "./styles/consent.css";
+import "./styles/question.css";
+import "./styles/passport.css";
+import "./styles/check-in.css";
+import "./styles/journey-select.css";
+import "./styles/journey-result.css";
+import "./styles/shared-result.css";
 
 const rootElement = document.getElementById("root");
 

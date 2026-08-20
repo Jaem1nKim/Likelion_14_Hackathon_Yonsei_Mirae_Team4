@@ -24,6 +24,7 @@ import { ProductRecommendationCard } from "../features/product-selection/Product
 import { createUuidV4 } from "../utils/uuid";
 
 const STAGE_LABEL = { BAG: "BAG", APPAREL: "APPAREL", ACCESSORY: "ACCESSORY" } as const;
+const STAGE_NUMBER = { BAG: 1, APPAREL: 2, ACCESSORY: 3 } as const;
 
 type Props = { view: ActiveJourneyView };
 type Operation = "next" | "finish" | null;
@@ -162,6 +163,102 @@ export function JourneyPage({ view }: Props) {
     ACCESSORY: "지금까지의 선택을 분석해 마지막 디테일을 추천했어요.",
   }[activeStage];
 
+  if (view === "select") {
+    const stageNumber = STAGE_NUMBER[activeStage];
+    return (
+      <div className="journey-select-page">
+        <main className="journey-select-experience">
+          <div className="journey-select-overlay" aria-hidden="true" />
+          <div className="journey-select-body">
+            <div className="journey-select-main">
+              <p className="journey-select-step" aria-label={`Journey ${stageNumber}단계 중 3단계`}>
+                {stageNumber} / 3
+              </p>
+
+              <div className="journey-select-heading-row">
+                <header className="journey-select-heading">
+                  <p>{String(stageNumber).padStart(2, "0")} — {STAGE_LABEL[activeStage]}</p>
+                  <h1>{step.scenarioTitle}</h1>
+                  <p>{step.scenarioText}</p>
+                </header>
+
+                <button
+                  className="journey-select-zone"
+                  type="button"
+                  onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/route`)}
+                >
+                  <span>{step.zone.name}{step.zone.floor ? ` · ${step.zone.floor}` : ""}</span>
+                  <small>{step.zone.directionText}</small>
+                </button>
+              </div>
+
+              {aiPersonalized && (
+                <aside className="journey-select-ai" aria-label="AI 맞춤 추천">
+                  <strong>✦ AI 맞춤 추천</strong>
+                  <span>{aiPersonalizationCopy}</span>
+                </aside>
+              )}
+
+              <section className="journey-select-recommendations" aria-labelledby="recommendations-title">
+                <h2 id="recommendations-title" className="visually-hidden">오늘의 추천</h2>
+                <div className="product-grid">
+                  {step.recommendations.map((recommendation) => (
+                    <ProductRecommendationCard
+                      key={recommendation.id}
+                      recommendation={recommendation}
+                      selected={step.selectedProduct?.id === recommendation.product.id}
+                      rejected={rejectedIds.has(recommendation.product.id)}
+                      pending={pendingProductId === recommendation.product.id}
+                      disabled={pendingProductId !== null || operation !== null}
+                      aiPersonalized={aiPersonalized}
+                      onInteraction={(type) => void handleInteraction(recommendation.product.id, type)}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              {(step.heritageTitle || step.heritageText) && (
+                <aside className="journey-select-heritage" aria-label="MCM Heritage">
+                  <strong>{step.heritageTitle ?? step.zone.heritageTitle}</strong>
+                  <span>{step.heritageText ?? step.zone.heritageStory}</span>
+                </aside>
+              )}
+
+              {actionError && <p className="journey-select-error" role="alert">{actionError}</p>}
+              {operation && (
+                <div className="journey-select-operation" role="status" aria-live="polite">
+                  <span className="loading-mark" aria-hidden="true" />
+                  <span>{operation === "next" ? "지금까지의 선택을 반영해 다음 스타일을 찾고 있어요." : "선택의 흐름을 분석해 Journey Signature를 완성하고 있어요."}</span>
+                </div>
+              )}
+            </div>
+
+            <footer className="journey-select-actions">
+              <button
+                className="journey-select-progress"
+                type="button"
+                disabled={operation !== null || pendingProductId !== null}
+                onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/progress`)}
+              >
+                <span aria-hidden="true">←</span>
+                진행 현황
+              </button>
+              {step.stage === "ACCESSORY" ? (
+                <PrimaryButton type="button" disabled={!currentAggregate.canFinishJourney} isLoading={operation === "finish"} onClick={() => void handleFinish()}>
+                  Journey 완성하기 <span aria-hidden="true">→</span>
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton type="button" disabled={!step.selectedProduct} isLoading={operation === "next"} onClick={() => void handleNext()}>
+                  다음 Journey <span aria-hidden="true">→</span>
+                </PrimaryButton>
+              )}
+            </footer>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <AppLayout>
       <JourneyStageProgress aggregate={currentAggregate} />
@@ -228,66 +325,6 @@ export function JourneyPage({ view }: Props) {
         </section>
       )}
 
-      {view === "select" && (
-        <>
-          <section className="zone-strip" aria-label="현재 매장 구역">
-            <div><span>NEXT ZONE</span><strong>{step.zone.name}</strong></div>
-            <p>{step.zone.directionText}</p>
-            <button className="button button-text" type="button" onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/route`)}>구역 자세히</button>
-          </section>
-
-          {(step.heritageTitle || step.heritageText) && (
-            <section className="heritage-panel" aria-labelledby="heritage-title">
-              <p className="eyebrow">MCM HERITAGE</p>
-              <h2 id="heritage-title">{step.heritageTitle ?? step.zone.heritageTitle}</h2>
-              <p>{step.heritageText ?? step.zone.heritageStory}</p>
-            </section>
-          )}
-
-          <section aria-labelledby="recommendations-title">
-            <div className="section-heading">
-              <h2 id="recommendations-title">오늘의 추천</h2>
-              <p>제품을 직접 비교하고 현재 Journey에 연결할 하나를 선택하세요.</p>
-            </div>
-            <div className="product-grid">
-              {step.recommendations.map((recommendation) => (
-                <ProductRecommendationCard
-                  key={recommendation.id}
-                  recommendation={recommendation}
-                  selected={step.selectedProduct?.id === recommendation.product.id}
-                  rejected={rejectedIds.has(recommendation.product.id)}
-                  pending={pendingProductId === recommendation.product.id}
-                  disabled={pendingProductId !== null || operation !== null}
-                  aiPersonalized={aiPersonalized}
-                  onInteraction={(type) => void handleInteraction(recommendation.product.id, type)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {actionError && <p className="form-error" role="alert">{actionError}</p>}
-          {operation && (
-            <div className="journey-operation" role="status" aria-live="polite">
-              <span className="loading-mark" aria-hidden="true" />
-              <span>{operation === "next" ? "지금까지의 선택을 반영해 다음 스타일을 찾고 있어요." : "선택의 흐름을 분석해 Journey Signature를 완성하고 있어요."}</span>
-            </div>
-          )}
-          <div className="page-actions page-actions-split journey-actions">
-            <button className="button button-secondary" type="button" onClick={() => navigate(`/journey/${encodeURIComponent(currentAggregate.journey.id)}/progress`)}>
-              진행 현황
-            </button>
-            {step.stage === "ACCESSORY" ? (
-              <PrimaryButton type="button" disabled={!currentAggregate.canFinishJourney} isLoading={operation === "finish"} onClick={() => void handleFinish()}>
-                Journey 완성하기
-              </PrimaryButton>
-            ) : (
-              <PrimaryButton type="button" disabled={!step.selectedProduct} isLoading={operation === "next"} onClick={() => void handleNext()}>
-                다음 Journey
-              </PrimaryButton>
-            )}
-          </div>
-        </>
-      )}
     </AppLayout>
   );
 }

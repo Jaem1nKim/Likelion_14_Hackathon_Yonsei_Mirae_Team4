@@ -4,11 +4,11 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import { errorMessage } from "../api/api-client";
 import { createReservation } from "../api/reservation-api";
-import { AppLayout } from "../components/AppLayout";
-import { PageHeader } from "../components/PageHeader";
+import { IntroductionHeader } from "../components/IntroductionHeader";
 import { PrimaryButton } from "../components/PrimaryButton";
-import { ProgressIndicator } from "../components/ProgressIndicator";
 import { useReservationDraft } from "../state/reservation-draft";
+
+const questionAssetRoot = "/assets/question";
 
 const START_QUESTION = {
   code: "TODAY_INTENT",
@@ -87,64 +87,82 @@ export function QuestionPage() {
   }
 
   return (
-    <AppLayout>
-      <ProgressIndicator current={3} />
-      <PageHeader
-        eyebrow="TODAY'S DIRECTION"
-        title="오늘의 Journey 방향"
-        description="한 가지 응답이 매장에서 시작할 스타일 여정의 기준이 됩니다."
-      />
+    <div className="question-figma-page">
+      <IntroductionHeader logoSrc={`${questionAssetRoot}/mcm-logo.svg`} />
+      <main className="question-figma-page__body">
+        <header className="question-figma-page__heading">
+          <h1>시작 질문</h1>
+          <span aria-label="예약 단계 3 / 3">3 / 3</span>
+        </header>
+        <p className="question-figma-page__lead">
+          취향과 기대하는 분위기를 알려주시면 매장 여정을 맞춤 구성해 드립니다.
+        </p>
 
-      <section className="reservation-summary" aria-label="예약 요약">
-        <div>
-          <span>매장</span>
-          <strong>{currentDraft.store.name}</strong>
-          <small>{currentDraft.store.location}</small>
-        </div>
-        <div>
-          <span>방문 일시</span>
-          <strong>{formatDateTime(currentDraft.reservedAt)}</strong>
-        </div>
-      </section>
+        <section className="question-reservation-card" aria-labelledby="question-reservation-title">
+          <h2 id="question-reservation-title">예약 정보</h2>
+          <div className="question-reservation-card__details">
+            <div>
+              <span>매장</span>
+              <strong>{currentDraft.store.name}</strong>
+              <small>{currentDraft.store.location}</small>
+            </div>
+            <div>
+              <span>방문 일시</span>
+              <strong>{formatDateTime(currentDraft.reservedAt)}</strong>
+            </div>
+          </div>
+        </section>
 
-      <fieldset className="plain-fieldset question-fieldset">
-        <legend>{START_QUESTION.text}</legend>
-        <div className="choice-grid answer-grid">
-          {START_QUESTION.answers.map((answer) => {
-            const selected = answer.code === selectedCode;
-            return (
-              <button
-                key={answer.code}
-                type="button"
-                className={`choice-card answer-card${selected ? " is-selected" : ""}`}
-                aria-pressed={selected}
-                onClick={() => setSelectedCode(answer.code)}
-              >
-                <span className="choice-content">
-                  <strong>{answer.label}</strong>
-                  <small>{answer.description}</small>
-                </span>
-                <span className="selection-label">{selected ? "선택됨" : "선택"}</span>
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
+        <section className="question-choice-card" aria-labelledby="start-question-title">
+          <h2 id="start-question-title">{START_QUESTION.text}</h2>
+          <p>오늘의 Journey 방향과 가장 가까운 응답 하나를 선택해 주세요.</p>
+          <div className="question-choice-list">
+            {START_QUESTION.answers.map((answer) => {
+              const selected = answer.code === selectedCode;
+              return (
+                <button
+                  key={answer.code}
+                  type="button"
+                  className={`question-choice${selected ? " is-selected" : ""}`}
+                  aria-pressed={selected}
+                  onClick={() => setSelectedCode(answer.code)}
+                >
+                  {selected ? (
+                    <img src={`${questionAssetRoot}/radio-selected.svg`} alt="" />
+                  ) : (
+                    <span className="question-choice__radio" aria-hidden="true" />
+                  )}
+                  <span className="question-choice__copy">
+                    <strong>{answer.label}</strong>
+                    <small>{answer.description}</small>
+                  </span>
+                  <span className="question-choice__state">{selected ? "선택됨" : "선택"}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
-      {error && <p className="form-error" role="alert">{error}</p>}
-      <div className="page-actions page-actions-split">
-        <button className="button button-secondary" type="button" onClick={() => navigate("/reserve")}>
-          이전
-        </button>
-        <PrimaryButton
-          type="button"
-          disabled={!selectedAnswer}
-          isLoading={isSubmitting}
-          onClick={() => void handleCreate()}
-        >
-          Journey Passport 만들기
-        </PrimaryButton>
-      </div>
-    </AppLayout>
+        {error && <p className="question-figma-page__error" role="alert">{error}</p>}
+        <div className="question-figma-actions">
+          <button
+            className="question-figma-button question-figma-button--secondary"
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => navigate("/reserve")}
+          >
+            이전
+          </button>
+          <PrimaryButton
+            type="button"
+            disabled={!selectedAnswer}
+            isLoading={isSubmitting}
+            onClick={() => void handleCreate()}
+          >
+            예약 완료하기
+          </PrimaryButton>
+        </div>
+      </main>
+    </div>
   );
 }

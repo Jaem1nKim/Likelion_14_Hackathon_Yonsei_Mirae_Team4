@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { apiFailure, journeyAggregate, success } from "./fixtures";
+import { apiFailure, journeyAggregate, journeyResult, success } from "./fixtures";
 import { authenticate, authenticatedResponses, mockFetchQueue, renderApp } from "./test-utils";
 
 describe("Journey transitions and recovery", () => {
@@ -67,11 +67,12 @@ describe("Journey transitions and recovery", () => {
     expect(await screen.findByRole("button", { name: "Journey 완성하기" })).toBeEnabled();
   });
 
-  it("passes expectedStepNumber to finish", async () => {
-    const fetchMock = mockFetchQueue(...authenticatedResponses(success(journeyAggregate("ACCESSORY", true)), success(journeyAggregate("FINISHED"))));
+  it("passes expectedStepNumber to finish and opens the result directly", async () => {
+    const fetchMock = mockFetchQueue(...authenticatedResponses(success(journeyAggregate("ACCESSORY", true)), success(journeyAggregate("FINISHED")), success(journeyResult)));
     renderApp("/journey/journey-1/select");
     await userEvent.click(await screen.findByRole("button", { name: "Journey 완성하기" }));
     expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body))).toEqual({ expectedStepNumber: 3 });
+    expect(await screen.findByRole("heading", { name: journeyResult.signatureName })).toBeInTheDocument();
   });
 
   it("prevents duplicate finish clicks", async () => {
@@ -100,6 +101,21 @@ describe("Journey transitions and recovery", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Journey 완성하기" })).toBeDisabled());
   });
 
+  it("recovers a completed stale finish directly into the result", async () => {
+    const fetchMock = mockFetchQueue(
+      ...authenticatedResponses(
+        success(journeyAggregate("ACCESSORY", true)),
+        apiFailure(409, "STALE_JOURNEY_STEP", "stale"),
+        success(journeyAggregate("FINISHED")),
+        success(journeyResult),
+      ),
+    );
+    renderApp("/journey/journey-1/select");
+    await userEvent.click(await screen.findByRole("button", { name: "Journey 완성하기" }));
+    expect(await screen.findByRole("heading", { name: journeyResult.signatureName })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+  });
+
   it("restores BAG directly from GET Journey", async () => {
     mockFetchQueue(...authenticatedResponses(success(journeyAggregate("BAG", true))));
     renderApp("/journey/journey-1/select");
@@ -121,9 +137,9 @@ describe("Journey transitions and recovery", () => {
   });
 
   it("keeps FINISHED users out of selection", async () => {
-    mockFetchQueue(...authenticatedResponses(success(journeyAggregate("FINISHED")), success(journeyAggregate("FINISHED"))));
+    mockFetchQueue(...authenticatedResponses(success(journeyAggregate("FINISHED")), success(journeyResult)));
     renderApp("/journey/journey-1/select");
-    expect(await screen.findByText("Journey가 완성되었습니다.")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: journeyResult.signatureName })).toBeInTheDocument();
     expect(screen.queryByText("오늘의 추천")).not.toBeInTheDocument();
   });
 

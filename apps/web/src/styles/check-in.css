@@ -1,0 +1,184 @@
+.checkin-figma-page {
+  min-height: 900px;
+  background: #ffffff;
+  color: #222222;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+.checkin-figma-page .introduction-header {
+  height: 73px;
+  padding: 24px;
+  border-bottom: 1px solid #d0d0d0;
+  background: #222222;
+}
+
+.checkin-figma-page .introduction-header__logo {
+  width: 75.802px;
+  height: 24px;
+}
+
+.checkin-figma-page .introduction-header__nav {
+  gap: 16px;
+}
+
+.checkin-figma-page__body {
+  display: flex;
+  min-height: 827px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 30px 120px 60px;
+}
+
+.checkin-figma-page__body h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+.checkin-figma-page__lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+.checkin-figma-form {
+  display: flex;
+  flex-direction: column;
+  gap: 21px;
+}
+
+.checkin-code-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  background: #f7f7f7;
+}
+
+.checkin-code-card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+.checkin-code-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkin-code-field label,
+.checkin-code-help {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.checkin-code-field input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 38px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #222222;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.checkin-code-field input::placeholder {
+  color: #9ca3af;
+}
+
+.checkin-code-field input:focus-visible {
+  border-color: #222222;
+  outline: 1px solid #222222;
+  outline-offset: 1px;
+}
+
+.checkin-code-help {
+  margin: 0;
+  color: #666666;
+}
+
+.checkin-figma-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e6b8b8;
+  border-radius: 5px;
+  background: #fff6f6;
+  color: #a12626;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.checkin-figma-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.checkin-figma-actions .button,
+.checkin-figma-button {
+  box-sizing: border-box;
+  min-height: 35px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.checkin-figma-button--secondary {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #222222;
+  cursor: pointer;
+}
+
+.checkin-figma-button--secondary:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.checkin-figma-button--secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 900px) {
+  .checkin-figma-page__body {
+    padding-right: 48px;
+    padding-left: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .checkin-figma-page .introduction-header {
+    height: 64px;
+    padding: 20px;
+  }
+
+  .checkin-figma-page__body {
+    min-height: calc(100vh - 64px);
+    padding: 24px 20px 40px;
+  }
+
+  .checkin-figma-actions {
+    flex-direction: column;
+  }
+
+  .checkin-figma-actions .button,
+  .checkin-figma-button {
+    width: 100%;
+  }
+}

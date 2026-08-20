@@ -21,7 +21,9 @@ describe("Journey Passport", () => {
     authenticate();
     const fetchMock = mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText(reservation.reservationCode)).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent(
+      reservation.reservationCode,
+    );
     expect(String(fetchMock.mock.calls[1]?.[0])).toContain(`/reservations/${reservation.id}`);
   });
 
@@ -29,8 +31,10 @@ describe("Journey Passport", () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText(reservation.reservationCode)).toBeInTheDocument();
-    expect(screen.getAllByText(customer.name)).toHaveLength(2);
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent(
+      reservation.reservationCode,
+    );
+    expect(screen.getByText(customer.name)).toBeInTheDocument();
     expect(screen.getByText(reservation.store.name)).toBeInTheDocument();
     expect(screen.getByText(reservation.startAnswerLabel)).toBeInTheDocument();
     expect(screen.getByText(reservation.qrToken)).toBeInTheDocument();
@@ -44,6 +48,17 @@ describe("Journey Passport", () => {
     expect(
       await screen.findByText("매장 도착 후 이 Passport를 직원에게 보여주세요."),
     ).toBeInTheDocument();
+  });
+
+  it("passes the reservation code to store check-in", async () => {
+    const user = userEvent.setup();
+    authenticate();
+    mockFetchQueue(...authenticatedResponses(success(reservation)));
+    renderApp(`/passport/${reservation.id}`);
+    await user.click(await screen.findByRole("button", { name: "매장 체크인" }));
+    expect(screen.getByLabelText("예약 코드를 입력해 주세요.")).toHaveValue(
+      reservation.reservationCode,
+    );
   });
 
   it("shows the CHECKED_IN guidance", async () => {
@@ -77,12 +92,12 @@ describe("Journey Passport", () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     const first = renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText("ABCD2345")).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent("ABCD2345");
     first.unmount();
 
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText("ABCD2345")).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent("ABCD2345");
   });
 
   it("clears login after a forbidden Passport response", async () => {
@@ -109,7 +124,7 @@ describe("Journey Passport", () => {
     authenticate();
     const fetchMock = mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    await screen.findByText("ABCD2345");
+    await screen.findByLabelText("수동 체크인 코드");
     const headers = fetchMock.mock.calls[1]?.[1]?.headers as Headers;
     expect(headers.get("X-Demo-User-Id")).toBe(customer.id);
     expect(Array.from(headers.keys()).some((name) => name.toLowerCase().includes("openai"))).toBe(false);
@@ -131,7 +146,9 @@ describe("Journey Passport", () => {
     authenticate();
     mockFetchQueue(...authenticatedResponses(success(reservation)));
     renderApp(`/passport/${reservation.id}`);
-    expect(await screen.findByText(reservation.reservationCode)).toBeInTheDocument();
+    expect(await screen.findByLabelText("수동 체크인 코드")).toHaveTextContent(
+      reservation.reservationCode,
+    );
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByRole("article")).toHaveClass("passport");
     expect(document.querySelector("output.reservation-code")).toHaveTextContent("ABCD2345");

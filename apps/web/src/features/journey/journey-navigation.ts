@@ -13,7 +13,7 @@ export function journeyPathForAggregate(
     return `/journey/${id}/intro`;
   }
   if (screen === "RESULT") {
-    return `/journey/${id}/decision`;
+    return `/journey/${id}/result`;
   }
   return `/journey/${id}/${activeView}`;
 }

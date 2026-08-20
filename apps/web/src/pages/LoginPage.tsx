@@ -1,6 +1,6 @@
 import type { DemoUser } from "@mcm/shared";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { errorMessage } from "../api/api-client";
 import { getUserConsent } from "../api/consent-api";
@@ -13,8 +13,14 @@ import { PrimaryButton } from "../components/PrimaryButton";
 import { useDemoUser } from "../hooks/useDemoUser";
 
 export function LoginPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const { login } = useDemoUser();
+  const shouldStartReservation =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "from" in location.state &&
+    location.state.from === "/reserve";
   const [users, setUsers] = useState<DemoUser[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +58,10 @@ export function LoginPage() {
     setError(null);
     try {
       const selectedUser = await login(selectedId);
+      if (shouldStartReservation) {
+        navigate("/reserve", { replace: true });
+        return;
+      }
       const { currentConsent } = await getUserConsent(selectedUser.id);
       navigate(currentConsent?.journeyDataAllowed ? "/profile" : "/consent", {
         replace: true,
@@ -61,7 +71,7 @@ export function LoginPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [isSubmitting, login, navigate, selectedId]);
+  }, [isSubmitting, login, navigate, selectedId, shouldStartReservation]);
 
   return (
     <AppLayout showUser={false}>

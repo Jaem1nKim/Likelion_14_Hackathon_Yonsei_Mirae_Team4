@@ -54,7 +54,7 @@ describe("customer login", () => {
     renderApp("/login");
     await user.click(await screen.findByRole("button", { name: /Stable Explorer/ }));
     await user.click(screen.getByRole("button", { name: "이 프로필로 시작하기" }));
-    expect(await screen.findByText("Journey를 위한 데이터 활용 동의")).toBeInTheDocument();
+    expect(await screen.findByText("온라인 관심 정보 활용 동의")).toBeInTheDocument();
   });
 
   it("stores only the selected user id in localStorage", async () => {
@@ -63,7 +63,7 @@ describe("customer login", () => {
     renderApp("/login");
     await user.click(await screen.findByRole("button", { name: /Stable Explorer/ }));
     await user.click(screen.getByRole("button", { name: "이 프로필로 시작하기" }));
-    await screen.findByText("Journey를 위한 데이터 활용 동의");
+    await screen.findByText("온라인 관심 정보 활용 동의");
     expect(localStorage.getItem(DEMO_USER_STORAGE_KEY)).toBe(customer.id);
     expect(localStorage.length).toBe(1);
   });

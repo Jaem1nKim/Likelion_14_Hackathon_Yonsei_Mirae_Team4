@@ -8,6 +8,16 @@ import { authenticate, authenticatedResponses, mockFetchQueue, renderApp } from 
 describe("Journey product selection", () => {
   beforeEach(authenticate);
 
+  it.each([
+    ["BAG", "1 / 3"],
+    ["APPAREL", "2 / 3"],
+    ["ACCESSORY", "3 / 3"],
+  ] as const)("shows the three-step progress for %s", async (stage, progress) => {
+    mockFetchQueue(...authenticatedResponses(success(journeyAggregate(stage))));
+    renderApp("/journey/journey-1/select");
+    expect(await screen.findByText(progress, { selector: ".journey-select-step" })).toBeInTheDocument();
+  });
+
   it("shows three server recommendations", async () => {
     mockFetchQueue(...authenticatedResponses(success(journeyAggregate("BAG"))));
     renderApp("/journey/journey-1/select");
